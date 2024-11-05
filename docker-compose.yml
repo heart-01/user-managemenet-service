@@ -1,0 +1,26 @@
+services:
+  db:
+    image: postgres:15
+    container_name: user_management_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: user_management
+    ports:
+      - '${DB_PORT}:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    container_name: user_management
+    build: .
+    command: npm run start
+    ports:
+      - '${PORT}:${PORT}'
+    depends_on:
+      - db
+    env_file:
+      - .env.prod
+
+volumes:
+  postgres_data:

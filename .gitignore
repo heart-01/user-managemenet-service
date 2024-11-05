@@ -1,0 +1,8 @@
+node_modules
+dist
+coverage
+.vscode
+.env.dev
+.env.prod
+.env.test
+.DS_Store
