@@ -6,7 +6,7 @@ import { userService } from '../../services/index';
 
 jest.mock('../../config/database', () => ({
   prisma: {
-    users: {
+    user: {
       findUnique: jest.fn(),
     },
   },
@@ -48,11 +48,11 @@ describe('User Service', () => {
         updatedAt: new Date('2024-11-01T00:00:00Z'),
       };
 
-      (prisma.users.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
       const result = await userService.getUserById(userId);
 
-      expect(prisma.users.findUnique).toHaveBeenCalledWith({
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
         select: {
           id: true,
@@ -67,7 +67,7 @@ describe('User Service', () => {
           updatedAt: true,
         },
       });
-      expect(prisma.users.findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expectedResult);
     });
@@ -76,11 +76,11 @@ describe('User Service', () => {
       const userId = 'adbe1b9a-562d-4554-bea4-e6ae35f3b001';
       const expectedResult = new RecordNotFoundError('User not found');
 
-      (prisma.users.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
       const result = await userService.getUserById(userId);
 
-      expect(prisma.users.findUnique).toHaveBeenCalledWith({
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
         select: {
           id: true,
@@ -95,7 +95,7 @@ describe('User Service', () => {
           updatedAt: true,
         },
       });
-      expect(prisma.users.findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
       expect(result.data).toStrictEqual(expectedResult);
     });
@@ -105,11 +105,11 @@ describe('User Service', () => {
       const mockError = new Error('Database error');
       const expectedResult = new Error('Database error');
 
-      (prisma.users.findUnique as jest.Mock).mockRejectedValueOnce(mockError);
+      (prisma.user.findUnique as jest.Mock).mockRejectedValueOnce(mockError);
 
       const result = await userService.getUserById(userId);
 
-      expect(prisma.users.findUnique).toHaveBeenCalledWith({
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: userId },
         select: {
           id: true,
@@ -124,7 +124,7 @@ describe('User Service', () => {
           updatedAt: true,
         },
       });
-      expect(prisma.users.findUnique).toHaveBeenCalledTimes(1);
+      expect(prisma.user.findUnique).toHaveBeenCalledTimes(1);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
       expect(result.data).toStrictEqual(expectedResult);
     });

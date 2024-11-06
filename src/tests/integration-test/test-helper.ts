@@ -19,7 +19,7 @@ const loadFixtures = async (model: ModelDelegate, data: any[]) => {
 
 const setupSimpleScenarioFixtures = async () => {
   try {
-    await loadFixtures(prisma.users, [users1]);
+    await loadFixtures(prisma.user, [users1]);
   } catch (e) {
     console.error(e);
   }
@@ -27,7 +27,7 @@ const setupSimpleScenarioFixtures = async () => {
 
 const cleanupData = async () => {
   try {
-    await prisma.users.deleteMany({});
+    await prisma.user.deleteMany({});
   } catch (e) {
     console.error(e);
   }

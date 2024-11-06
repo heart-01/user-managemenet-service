@@ -19,19 +19,109 @@ enum USER_STATUS {
   ACTIVATED
 }
 
-model Users {
-  id              String      @id @default(uuid()) @db.Uuid
-  name            String?     @map("name") @db.VarChar(50)
-  phoneNumber     String?     @map("phone_number") @db.VarChar(20)
-  bio             String?     @map("bio") @db.Text
-  username        String?     @map("username") @db.VarChar(50)
-  password        String?     @map("password") @db.VarChar(50)
-  email           String      @map("email") @db.VarChar(50)
-  profileImageUrl String?     @map("profile_image_url") @db.VarChar(255)
-  status          USER_STATUS @map("status")
-  createdAt       DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt       DateTime    @default(now()) @map("updated_at") @db.Timestamptz(3)
+enum AuthProviderName {
+  GOOGLE
+  FACEBOOK
+  GITHUB
+  TWITTER
+  EMAIL
+}
+
+enum ActionType {
+  SIGNUP
+  RESETPASSWORD
+}
+
+enum PolicyType {
+  PRIVATE
+  TERMOFSERVICES
+}
+
+enum LoginStatus {
+  SUCCESS
+  FAILED
+}
+
+model User {
+  id                String              @id @default(uuid()) @db.Uuid
+  name              String?             @map("name") @db.VarChar(50)
+  phoneNumber       String?             @map("phone_number") @db.VarChar(20)
+  bio               String?             @map("bio") @db.Text
+  username          String?             @map("username") @db.VarChar(50)
+  password          String?             @map("password") @db.VarChar(50)
+  email             String              @map("email") @db.VarChar(50)
+  profileImageUrl   String?             @map("profile_image_url") @db.VarChar(255)
+  status            USER_STATUS         @map("status")
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime            @default(now()) @map("updated_at") @db.Timestamptz(3)
+  AuthProvider      AuthProvider[]
+  EmailVerification EmailVerification[]
+  UserPolicy        UserPolicy[]
 
   @@unique([email])
   @@map("users")
+}
+
+model AuthProvider {
+  id             Int              @id
+  userId         String           @map("user_id") @db.Uuid
+  authProvider   AuthProviderName @map("auth_provider")
+  providerUserId String           @map("provider_user_id") @db.VarChar(50)
+  providerEmail  String           @map("provider_email") @db.VarChar(50)
+  linkedAt       DateTime         @default(now()) @map("linked_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("auth_providers")
+}
+
+model EmailVerification {
+  token       String     @id @map("token") @db.VarChar(255)
+  userId      String     @map("user_id") @db.Uuid
+  createdAt   DateTime   @map("created_at") @db.Timestamp(3)
+  expiredAt   DateTime   @map("expired_at") @db.Timestamp(3)
+  completedAt DateTime?  @map("completed_at") @db.Timestamp(3)
+  actionType  ActionType @map("action_type")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("email_verifications")
+}
+
+model Policy {
+  id         Int          @id
+  type       PolicyType   @map("type")
+  content    String       @map("content") @db.Text
+  version    String       @map("version") @db.VarChar(5)
+  createdAt  DateTime     @map("created_at") @db.Timestamp(3)
+  updatedAt  DateTime     @map("updated_at") @db.Timestamp(3)
+  UserPolicy UserPolicy[]
+
+  @@map("policies")
+}
+
+model UserPolicy {
+  id       Int      @id
+  userId   String   @map("user_id") @db.Uuid
+  policyId Int      @map("policy_id")
+  agreedAt DateTime @map("agreed_at") @db.Timestamp(3)
+
+  user   User   @relation(fields: [userId], references: [id])
+  policy Policy @relation(fields: [policyId], references: [id])
+
+  @@map("user_policies")
+}
+
+model UserLoginHistory {
+  id            Int         @id
+  email         String      @map("email") @db.VarChar(50)
+  loginTime     DateTime    @map("login_time") @db.Timestamp(3)
+  ipAddress     String      @map("ip_address") @db.VarChar(50)
+  location      String?     @map("location") @db.VarChar(50)
+  userAgent     String?     @map("user_agent") @db.VarChar(50)
+  status        LoginStatus @map("status")
+  failureReason String?     @map("failure_reason") @db.VarChar(255)
+  createdAt     DateTime    @map("created_at") @db.Timestamp(3)
+
+  @@map("user_login_histories")
 }

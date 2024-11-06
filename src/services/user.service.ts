@@ -10,7 +10,7 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
     loggerService.info('getUserById');
     loggerService.debug('userId', id);
 
-    const result: UserType | null = await prisma.users.findUnique({
+    const result: UserType | null = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
