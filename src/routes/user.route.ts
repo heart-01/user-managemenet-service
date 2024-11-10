@@ -2,6 +2,8 @@ import express from 'express';
 import { userController } from '../controllers';
 import { validateSchemaMiddleware, JOI_OPTIONS } from '../middlewares/validation';
 import userValidator from '../validators/user.validator';
+import { authenticateMiddleware } from '../middlewares/authentication';
+import { authorizeMiddleware } from '../middlewares/authorize';
 
 const userRouter: express.Router = express.Router();
 
@@ -21,26 +23,22 @@ const userRouter: express.Router = express.Router();
  */
 
 /**
- * Error 404 Response Type
- * @typedef {object} RecordNotFoundError
- * @property {string} message - Error message
- */
-
-/**
- * GET /api/users/{id}
+ * GET /users/{id}
  * @summary Get User's information
  * @tags users
  * @param {string} id.path.required - User ID
  * @return {UserSuccessResponse} 200 - Success response - application/json
- * @return {RecordNotFoundError} 404 - User not found - application/json
+ * @return {string} 404 - User not found - application/json
  */
 
 userRouter.get(
   '/:id',
+  authenticateMiddleware,
   validateSchemaMiddleware({
     options: JOI_OPTIONS.params,
     schema: userValidator.getUserById,
   }),
+  authorizeMiddleware('read', 'getUserById'),
   userController.getUserById,
 );
 
