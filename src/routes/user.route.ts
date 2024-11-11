@@ -4,6 +4,7 @@ import { validateSchemaMiddleware, JOI_OPTIONS } from '../middlewares/validation
 import userValidator from '../validators/user.validator';
 import { authenticateMiddleware } from '../middlewares/authentication';
 import { authorizeMiddleware } from '../middlewares/authorize';
+import { Actions } from '../enums/ability.enum';
 
 const userRouter: express.Router = express.Router();
 
@@ -38,7 +39,7 @@ userRouter.get(
     options: JOI_OPTIONS.params,
     schema: userValidator.getUserById,
   }),
-  authorizeMiddleware('read', 'getUserById'),
+  authorizeMiddleware(Actions.Read, 'getUserById'),
   userController.getUserById,
 );
 

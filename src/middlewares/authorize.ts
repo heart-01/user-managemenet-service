@@ -1,9 +1,11 @@
 import { Response, NextFunction } from 'express';
 import { subject } from '@casl/ability';
-import { Actions, AppSubjects, defineAbilitiesFor } from '../config/ability';
+import { defineAbilitiesFor } from '../config/ability';
 import { AuthRequest } from '../types/auth.type';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { UserType } from '../types/users.type';
+import { Actions } from '../enums/ability.enum';
+import { AppSubjects } from '../types/ability.type';
 
 export const authorizeMiddleware =
   (action: Actions, resource: AppSubjects) =>
