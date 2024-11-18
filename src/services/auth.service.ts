@@ -69,7 +69,7 @@ const googleAuth = async (
     // Case user used to login with google before
     if (user && authProvider) {
       const accessToken = generateToken(
-        { userId: user.id, name: user.name },
+        { id: user.id, name: user.name },
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN,
       );
@@ -132,7 +132,7 @@ const googleAuth = async (
         return newUser;
       });
       const accessToken = generateToken(
-        { userId: result.id, name: result.name },
+        { id: result.id, name: result.name },
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN,
       );

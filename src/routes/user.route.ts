@@ -26,6 +26,7 @@ const userRouter: express.Router = express.Router();
 /**
  * GET /user/{id}
  * @summary Get User's information
+ * @security bearerAuth
  * @tags users
  * @param {string} id.path.required - User ID
  * @return {UserSuccessResponse} 200 - Success response - application/json

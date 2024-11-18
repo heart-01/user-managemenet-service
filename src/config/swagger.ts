@@ -13,9 +13,9 @@ const swaggerOptions = {
     },
   ],
   security: {
-    BasicAuth: {
+    bearerAuth: {
       type: 'http',
-      scheme: 'basic',
+      scheme: 'bearer',
     },
   },
   baseDir: __dirname,

@@ -17,9 +17,10 @@ export const authorizeMiddleware =
     const permitted = ability.can(action, subject(resource as string, subjectData) as any);
 
     if (!permitted) {
+      const resourceUrl = request.originalUrl;
       response
         .status(HTTP_RESPONSE_CODE.FORBIDDEN)
-        .send(`You are not allowed to ${action} on ${resource}`);
+        .send(`You are not allowed to ${action} on ${resourceUrl}`);
       return;
     }
 
