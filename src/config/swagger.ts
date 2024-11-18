@@ -1,3 +1,5 @@
+import { PORT } from "./dotenv";
+
 const swaggerOptions = {
   info: {
     version: '1.0.0',
@@ -7,11 +9,6 @@ const swaggerOptions = {
       name: 'MIT',
     },
   },
-  servers: [
-    {
-      url: '/api',
-    },
-  ],
   security: {
     bearerAuth: {
       type: 'http',
@@ -35,6 +32,17 @@ const swaggerOptions = {
   // you can extend swagger-ui-express config. You can checkout an example of this
   // in the `example/configuration/swaggerOptions.js`
   swaggerUiOptions: {},
+  servers: [
+    {
+      url: 'http://localhost:{port}/api',
+      description: 'The Local API server',
+      variables: {
+        port: {
+          default: PORT,
+        },
+      },
+    },
+  ],
 };
 
 export { swaggerOptions };
