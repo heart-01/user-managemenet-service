@@ -6,7 +6,7 @@ const user1 = {
   phoneNumber: '123456789',
   bio: 'Software Developer',
   email: 'john@email.com',
-  profileImageUrl: 'http://example.com/image.jpg',
+  imageUrl: 'http://example.com/image.jpg',
   status: 'ACTIVATED',
   createdAt: new Date('2024-11-01'),
   updatedAt: new Date('2024-11-01'),

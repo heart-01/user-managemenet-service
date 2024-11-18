@@ -24,7 +24,7 @@ describe('User Service Test:', () => {
       expect(user.bio).toEqual(user1.bio);
       expect(user.username).toEqual(user1.username);
       expect(user.email).toEqual(user1.email);
-      expect(user.profileImageUrl).toEqual(user1.profileImageUrl);
+      expect(user.imageUrl).toEqual(user1.imageUrl);
       expect(user.status).toEqual(user1.status);
     });
 
