@@ -7,6 +7,11 @@ const swaggerOptions = {
       name: 'MIT',
     },
   },
+  servers: [
+    {
+      url: '/api',
+    },
+  ],
   security: {
     BasicAuth: {
       type: 'http',
