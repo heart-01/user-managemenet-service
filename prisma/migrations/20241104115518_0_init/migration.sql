@@ -5,7 +5,7 @@ CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED');
 CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
 
 -- CreateEnum
-CREATE TYPE "ACTION_TYPE" AS ENUM ('SIGNUP', 'RESETPASSWORD');
+CREATE TYPE "ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD');
 
 -- CreateEnum
 CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES');
@@ -44,12 +44,12 @@ CREATE TABLE "auth_providers" (
 
 -- CreateTable
 CREATE TABLE "email_verifications" (
-    "token" VARCHAR(255) NOT NULL,
+    "token" TEXT NOT NULL,
     "user_id" UUID NOT NULL,
+    "type" "ACTION_TYPE" NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expired_at" TIMESTAMP(3) NOT NULL,
     "completed_at" TIMESTAMP(3),
-    "action_type" "ACTION_TYPE" NOT NULL,
 
     CONSTRAINT "email_verifications_pkey" PRIMARY KEY ("token")
 );

@@ -28,7 +28,7 @@ enum AUTH_PROVIDER_NAME {
 }
 
 enum ACTION_TYPE {
-  SIGNUP
+  REGISTER
   RESETPASSWORD
 }
 
@@ -77,12 +77,12 @@ model AuthProvider {
 }
 
 model EmailVerification {
-  token       String      @id @map("token") @db.VarChar(255)
+  token       String      @id @map("token") @db.Text
   userId      String      @map("user_id") @db.Uuid
+  type        ACTION_TYPE @map("type")
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
   expiredAt   DateTime    @map("expired_at") @db.Timestamp(3)
   completedAt DateTime?   @map("completed_at") @db.Timestamp(3)
-  ACTION_TYPE ACTION_TYPE @map("action_type")
 
   user User @relation(fields: [userId], references: [id])
 
