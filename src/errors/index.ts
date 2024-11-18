@@ -49,3 +49,13 @@ export class AuthProviderMismatchException extends Error {
     return this.message;
   }
 }
+
+export class LocalRegisterMismatchException extends Error {
+  constructor() {
+    super('incorrect local register mismatch.');
+  }
+
+  toJSON() {
+    return this.message;
+  }
+}

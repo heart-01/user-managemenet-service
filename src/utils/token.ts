@@ -7,7 +7,7 @@ const defaultOptions: SignOptions = {
   audience: JWT_AUDIENCE,
 };
 
-const generateToken = (
+export const generateToken = (
   payload: object,
   secret: Secret,
   expiresIn: SignOptions['expiresIn'],
@@ -16,5 +16,3 @@ const generateToken = (
     expiresIn,
     ...defaultOptions,
   });
-
-export default generateToken;

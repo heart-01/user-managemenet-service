@@ -1,12 +1,16 @@
 import { Request } from 'express';
 import { UserType } from './users.type';
 
-export interface AuthRequest extends Request {
+export type AuthRequest = Request & {
   user?: UserType;
-}
+};
 
 export type googleAuthType = {
   idToken: string;
+};
+
+export type localRegisterType = {
+  email: string;
 };
 
 export type AuthResponseType = {

@@ -27,8 +27,8 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
-  * @typedef {object} GoogleAuthRequest
-  * @property {string} idToken.required - Google Auth idToken
+ * @typedef {object} GoogleAuthRequest
+ * @property {string} idToken.required - Google Auth idToken
  */
 
 /**
@@ -38,7 +38,31 @@ const authRouter: express.Router = express.Router();
  * @param {GoogleAuthRequest} request.body.required - Google Auth idToken
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
- * @return {string} 409 - Conflict - application/json
+ * @return {string} 409 - Conflict Error - application/json
+ */
+
+/**
+ * @typedef {object} RegisterRequest
+ * @property {string} email.required - User's email address
+ */
+
+/**
+ * @typedef {object} RegisterSuccessResponse
+ * @property {string} token - token
+ * @property {string} userId - user id
+ * @property {string} type - action type for the token
+ * @property {string} createdAt - token creation timestamp
+ * @property {string} expiredAt - token expiration timestamp
+ * @property {string} completedAt - token completion timestamp
+ */
+
+/**
+ * POST /auth/local/register
+ * @summary Local Register
+ * @tags auth
+ * @param {RegisterRequest} request.body.required - User's email address
+ * @return {RegisterSuccessResponse} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
  */
 
 authRouter.post(
@@ -48,6 +72,15 @@ authRouter.post(
     schema: authValidator.googleAuth,
   }),
   authController.googleAuth,
+);
+
+authRouter.post(
+  '/local/register',
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.localRegister,
+  }),
+  authController.localRegister,
 );
 
 export default authRouter;
