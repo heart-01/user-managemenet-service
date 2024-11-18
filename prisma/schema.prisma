@@ -14,12 +14,12 @@ datasource db {
   url      = env("DB_URL")
 }
 
-enum UserStatus {
+enum USER_STATUS {
   PENDING
   ACTIVATED
 }
 
-enum AuthProviderName {
+enum AUTH_PROVIDER_NAME {
   GOOGLE
   FACEBOOK
   GITHUB
@@ -27,17 +27,17 @@ enum AuthProviderName {
   EMAIL
 }
 
-enum ActionType {
+enum ACTION_TYPE {
   SIGNUP
   RESETPASSWORD
 }
 
-enum PolicyType {
+enum POLICY_TYPE {
   PRIVATE
   TERMOFSERVICES
 }
 
-enum LoginStatus {
+enum LOGIN_STATUS {
   SUCCESS
   FAILED
 }
@@ -50,8 +50,8 @@ model User {
   username          String?             @map("username") @db.VarChar(50)
   password          String?             @map("password") @db.VarChar(50)
   email             String              @map("email") @db.VarChar(50)
-  picture           String?             @map("picture") @db.VarChar(255)
-  status            UserStatus          @map("status")
+  imageUrl          String?             @map("imageUrl") @db.VarChar(255)
+  status            USER_STATUS         @map("status")
   createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime            @default(now()) @map("updated_at") @db.Timestamptz(3)
   AuthProvider      AuthProvider[]
@@ -63,12 +63,12 @@ model User {
 }
 
 model AuthProvider {
-  id             String           @id @default(uuid()) @db.Uuid
-  userId         String?          @map("user_id") @db.Uuid
-  authProvider   AuthProviderName @map("auth_provider")
-  providerUserId String           @map("provider_user_id") @db.VarChar(50)
-  providerEmail  String           @map("provider_email") @db.VarChar(50)
-  linkedAt       DateTime         @default(now()) @map("linked_at") @db.Timestamptz(3)
+  id             String             @id @default(uuid()) @db.Uuid
+  userId         String?            @map("user_id") @db.Uuid
+  authProvider   AUTH_PROVIDER_NAME @map("auth_provider")
+  providerUserId String             @map("provider_user_id") @db.VarChar(50)
+  providerEmail  String             @map("provider_email") @db.VarChar(50)
+  linkedAt       DateTime           @default(now()) @map("linked_at") @db.Timestamptz(3)
 
   user User? @relation(fields: [userId], references: [id])
 
@@ -77,12 +77,12 @@ model AuthProvider {
 }
 
 model EmailVerification {
-  token       String     @id @map("token") @db.VarChar(255)
-  userId      String     @map("user_id") @db.Uuid
-  createdAt   DateTime   @map("created_at") @db.Timestamp(3)
-  expiredAt   DateTime   @map("expired_at") @db.Timestamp(3)
-  completedAt DateTime?  @map("completed_at") @db.Timestamp(3)
-  actionType  ActionType @map("action_type")
+  token       String      @id @map("token") @db.VarChar(255)
+  userId      String      @map("user_id") @db.Uuid
+  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiredAt   DateTime    @map("expired_at") @db.Timestamp(3)
+  completedAt DateTime?   @map("completed_at") @db.Timestamp(3)
+  ACTION_TYPE ACTION_TYPE @map("action_type")
 
   user User @relation(fields: [userId], references: [id])
 
@@ -91,11 +91,11 @@ model EmailVerification {
 
 model Policy {
   id         String       @id @default(uuid()) @db.Uuid
-  type       PolicyType   @map("type")
+  type       POLICY_TYPE  @map("type")
   content    String       @map("content") @db.Text
   version    String       @map("version") @db.VarChar(5)
-  createdAt  DateTime     @map("created_at") @db.Timestamp(3)
-  updatedAt  DateTime     @map("updated_at") @db.Timestamp(3)
+  createdAt  DateTime     @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt  DateTime     @default(now()) @map("updated_at") @db.Timestamptz(3)
   UserPolicy UserPolicy[]
 
   @@map("policies")
@@ -114,15 +114,15 @@ model UserPolicy {
 }
 
 model UserLoginHistory {
-  id            String      @id @default(uuid()) @db.Uuid
-  email         String      @map("email") @db.VarChar(50)
-  loginTime     DateTime    @map("login_time") @db.Timestamp(3)
-  ipAddress     String      @map("ip_address") @db.VarChar(50)
-  location      String?     @map("location") @db.VarChar(50)
-  userAgent     String?     @map("user_agent") @db.VarChar(50)
-  status        LoginStatus @map("status")
-  failureReason String?     @map("failure_reason") @db.VarChar(255)
-  createdAt     DateTime    @map("created_at") @db.Timestamp(3)
+  id            String       @id @default(uuid()) @db.Uuid
+  email         String       @map("email") @db.VarChar(50)
+  loginTime     DateTime     @map("login_time") @db.Timestamp(3)
+  ipAddress     String       @map("ip_address") @db.VarChar(50)
+  location      String?      @map("location") @db.VarChar(50)
+  userAgent     String?      @map("user_agent") @db.VarChar(50)
+  status        LOGIN_STATUS @map("status")
+  failureReason String?      @map("failure_reason") @db.VarChar(255)
+  createdAt     DateTime     @map("created_at") @db.Timestamp(3)
 
   @@map("user_login_histories")
 }

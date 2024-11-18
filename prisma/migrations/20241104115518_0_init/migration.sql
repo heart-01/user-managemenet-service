@@ -1,17 +1,17 @@
 -- CreateEnum
-CREATE TYPE "UserStatus" AS ENUM ('PENDING', 'ACTIVATED');
+CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED');
 
 -- CreateEnum
-CREATE TYPE "AuthProviderName" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
+CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
 
 -- CreateEnum
-CREATE TYPE "ActionType" AS ENUM ('SIGNUP', 'RESETPASSWORD');
+CREATE TYPE "ACTION_TYPE" AS ENUM ('SIGNUP', 'RESETPASSWORD');
 
 -- CreateEnum
-CREATE TYPE "PolicyType" AS ENUM ('PRIVATE', 'TERMOFSERVICES');
+CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES');
 
 -- CreateEnum
-CREATE TYPE "LoginStatus" AS ENUM ('SUCCESS', 'FAILED');
+CREATE TYPE "LOGIN_STATUS" AS ENUM ('SUCCESS', 'FAILED');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -22,8 +22,8 @@ CREATE TABLE "users" (
     "username" VARCHAR(50),
     "password" VARCHAR(50),
     "email" VARCHAR(50) NOT NULL,
-    "picture" VARCHAR(255),
-    "status" "UserStatus" NOT NULL,
+    "imageUrl" VARCHAR(255),
+    "status" "USER_STATUS" NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -34,7 +34,7 @@ CREATE TABLE "users" (
 CREATE TABLE "auth_providers" (
     "id" UUID NOT NULL,
     "user_id" UUID,
-    "auth_provider" "AuthProviderName" NOT NULL,
+    "auth_provider" "AUTH_PROVIDER_NAME" NOT NULL,
     "provider_user_id" VARCHAR(50) NOT NULL,
     "provider_email" VARCHAR(50) NOT NULL,
     "linked_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -46,10 +46,10 @@ CREATE TABLE "auth_providers" (
 CREATE TABLE "email_verifications" (
     "token" VARCHAR(255) NOT NULL,
     "user_id" UUID NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expired_at" TIMESTAMP(3) NOT NULL,
     "completed_at" TIMESTAMP(3),
-    "action_type" "ActionType" NOT NULL,
+    "action_type" "ACTION_TYPE" NOT NULL,
 
     CONSTRAINT "email_verifications_pkey" PRIMARY KEY ("token")
 );
@@ -57,11 +57,11 @@ CREATE TABLE "email_verifications" (
 -- CreateTable
 CREATE TABLE "policies" (
     "id" UUID NOT NULL,
-    "type" "PolicyType" NOT NULL,
+    "type" "POLICY_TYPE" NOT NULL,
     "content" TEXT NOT NULL,
     "version" VARCHAR(5) NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL,
-    "updated_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "policies_pkey" PRIMARY KEY ("id")
 );
@@ -84,7 +84,7 @@ CREATE TABLE "user_login_histories" (
     "ip_address" VARCHAR(50) NOT NULL,
     "location" VARCHAR(50),
     "user_agent" VARCHAR(50),
-    "status" "LoginStatus" NOT NULL,
+    "status" "LOGIN_STATUS" NOT NULL,
     "failure_reason" VARCHAR(255),
     "created_at" TIMESTAMP(3) NOT NULL,
 

@@ -30,15 +30,11 @@ const seed = async () => {
           type: 'TERMOFSERVICES',
           content: 'Termofservices policy',
           version: '1.0.0',
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
         {
           type: 'PRIVATE',
           content: 'Private policy',
           version: '1.0.0',
-          createdAt: new Date(),
-          updatedAt: new Date(),
         },
       ],
     });

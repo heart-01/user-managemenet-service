@@ -13,7 +13,7 @@ const authRouter: express.Router = express.Router();
  * @property {string} bio - User's biography
  * @property {string} username - User's username
  * @property {string} email - User's email address
- * @property {string} picture - URL to user's profile image
+ * @property {string} imageUrl - URL to user's profile image
  * @property {string} status - User's status
  * @property {string} createdAt - Account creation timestamp
  * @property {string} updatedAt - Last update timestamp
@@ -32,7 +32,7 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * POST /auth/google
+ * POST /auth/google/login
  * @summary Google Auth
  * @tags auth
  * @param {GoogleAuthRequest} request.body.required - Google Auth idToken
@@ -42,7 +42,7 @@ const authRouter: express.Router = express.Router();
  */
 
 authRouter.post(
-  '/google',
+  '/google/login',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
     schema: authValidator.googleAuth,

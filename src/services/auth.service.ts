@@ -4,7 +4,7 @@ import loggerService from './logger.service';
 import authValidator from '../validators/auth.validator';
 import { ACCESS_TOKEN_EXPIRES_IN, GOOGLE_CLIENT_ID, JWT_SECRET } from '../config/dotenv';
 import { googleClient } from '../config/googleAuth';
-import { prisma, AuthProviderName, UserStatus, runTransaction } from '../config/database';
+import { prisma, AUTH_PROVIDER_NAME, USER_STATUS, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
@@ -53,7 +53,7 @@ const googleAuth = async (
         bio: true,
         username: true,
         email: true,
-        picture: true,
+        imageUrl: true,
         status: true,
         createdAt: true,
         updatedAt: true,
@@ -62,7 +62,7 @@ const googleAuth = async (
     const authProvider: AuthProvider | null = await prisma.authProvider.findUnique({
       where: {
         providerUserId: userPayload.sub,
-        authProvider: AuthProviderName.GOOGLE,
+        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
       },
     });
 
@@ -89,12 +89,12 @@ const googleAuth = async (
 
     // Create new user and authProvider
     if (!user && !authProvider) {
-      const result = await runTransaction(async (tx) => {
-        const newUser: UserType = await tx.user.create({
+      const result = await runTransaction(async (prismaTransaction) => {
+        const newUser: UserType = await prismaTransaction.user.create({
           data: {
             name: userPayload.name,
             email: userPayload.email,
-            status: UserStatus.ACTIVATED,
+            status: USER_STATUS.ACTIVATED,
           },
           select: {
             id: true,
@@ -103,29 +103,29 @@ const googleAuth = async (
             bio: true,
             username: true,
             email: true,
-            picture: true,
+            imageUrl: true,
             status: true,
             createdAt: true,
             updatedAt: true,
           },
         });
-        await tx.authProvider.create({
+        await prismaTransaction.authProvider.create({
           data: {
             userId: newUser.id,
-            authProvider: AuthProviderName.GOOGLE,
+            authProvider: AUTH_PROVIDER_NAME.GOOGLE,
             providerUserId: userPayload.sub,
             providerEmail: userPayload.email,
           },
         });
 
         // Create user policy
-        const policies = await tx.policy.findMany();
+        const policies = await prismaTransaction.policy.findMany();
         const createUserPolices = policies.map((policy) => ({
           userId: newUser.id,
           policyId: policy.id,
           agreedAt: new Date(),
         }));
-        await tx.userPolicy.createMany({
+        await prismaTransaction.userPolicy.createMany({
           data: createUserPolices,
         });
 
