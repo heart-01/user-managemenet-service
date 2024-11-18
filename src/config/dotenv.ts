@@ -17,9 +17,16 @@ dotenvExpand.expand(dotenv.config({ path: envFile }));
 export const NODE_ENV = process.env.NODE_ENV || '';
 export const PORT = process.env.PORT || 3000;
 export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+export const TIMEZONE = process.env.TIMEZONE || 'Asia/Bangkok';
+
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
+
 export const JWT_SECRET = process.env.JWT_SECRET || '';
 export const JWT_ISSUER = process.env.JWT_ISSUER || '';
 export const JWT_AUDIENCE = process.env.JWT_AUDIENCE || '';
 export const ACCESS_TOKEN_EXPIRES_IN = process.env.ACCESS_TOKEN_EXPIRES_IN || '7d';
+
+export const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY || '';
+export const SENDGRID_SENDER_EMAIL = process.env.SENDGRID_SENDER_EMAIL || '';
+export const SENDGRID_TEMPLATE_VERIFY_EMAIL = process.env.SENDGRID_TEMPLATE_VERIFY_EMAIL || '';
