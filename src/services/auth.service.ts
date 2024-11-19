@@ -188,7 +188,7 @@ const localRegister = async (
     }
 
     // Config expiredAt and expiresIn for email verification
-    const expiredAt = dayjs().add(1, 'minute').toDate();
+    const expiredAt = dayjs().add(1, 'd').toDate();
     const expiresIn = Math.floor((expiredAt.getTime() - Date.now()) / 1000); // Convert expiredAt to seconds
 
     // Case user registered but not activated
