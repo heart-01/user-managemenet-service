@@ -77,7 +77,7 @@ model AuthProvider {
 }
 
 model EmailVerification {
-  token       String      @id @map("token") @db.Text
+  token       String      @id @map("token") @db.Uuid
   userId      String      @map("user_id") @db.Uuid
   type        ACTION_TYPE @map("type")
   createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)

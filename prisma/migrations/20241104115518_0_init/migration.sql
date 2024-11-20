@@ -44,7 +44,7 @@ CREATE TABLE "auth_providers" (
 
 -- CreateTable
 CREATE TABLE "email_verifications" (
-    "token" TEXT NOT NULL,
+    "token" UUID NOT NULL,
     "user_id" UUID NOT NULL,
     "type" "ACTION_TYPE" NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

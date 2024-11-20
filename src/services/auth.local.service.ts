@@ -1,12 +1,12 @@
+import { v4 as uuidv4 } from 'uuid';
 import { EmailVerification } from '@prisma/client';
 import loggerService from './logger.service';
 import dayjs from '../config/dayjs';
-import { JWT_SECRET, SENDGRID_TEMPLATE_VERIFY_EMAIL } from '../config/dotenv';
+import { SENDGRID_TEMPLATE_VERIFY_EMAIL } from '../config/dotenv';
 import { prisma, USER_STATUS, ACTION_TYPE } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
-import { generateToken } from '../utils/token';
 import { sendEmailWithTemplate } from '../utils/email';
 import { ConflictError, LocalRegisterMismatchException, ResponseError } from '../errors';
 
@@ -27,9 +27,8 @@ const register = async (
       };
     }
 
-    // Config expiredAt and expiresIn for email verification
+    // Config expiredAt for email verification
     const expiredAt = dayjs().add(1, 'd').toDate();
-    const expiresIn = Math.floor((expiredAt.getTime() - Date.now()) / 1000); // Convert expiredAt to seconds
 
     // Case user registered but not activated
     if (user && user.status === USER_STATUS.PENDING) {
@@ -47,11 +46,10 @@ const register = async (
 
       // Case email verification is expired
       if (isEmailExpired) {
-        const newToken = generateToken({ id: emailVerification.userId }, JWT_SECRET, expiresIn);
         const newEmailVerification = await prisma.emailVerification.create({
           data: {
             userId: emailVerification.userId,
-            token: newToken,
+            token: uuidv4(),
             expiredAt,
             type: ACTION_TYPE.REGISTER,
           },
@@ -93,11 +91,10 @@ const register = async (
       const newUser: UserType = await prisma.user.create({
         data: { email, status: USER_STATUS.PENDING },
       });
-      const newToken = generateToken({ id: newUser.id }, JWT_SECRET, expiresIn);
       const newEmailVerification = await prisma.emailVerification.create({
         data: {
           userId: newUser.id,
-          token: newToken,
+          token: uuidv4(),
           expiredAt,
           type: ACTION_TYPE.REGISTER,
         },
