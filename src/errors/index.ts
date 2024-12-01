@@ -30,6 +30,16 @@ export class ConflictError extends Error {
   }
 }
 
+export class InvalidDataError extends Error {
+  constructor(message: string | null) {
+    super(message || 'Invalid data');
+  }
+
+  toJSON() {
+    return this.message;
+  }
+}
+
 export class GoogleIdTokenMissingScopeError extends Error {
   constructor() {
     super('Scope is missing. required scope: sub, email, name');
@@ -40,7 +50,7 @@ export class GoogleIdTokenMissingScopeError extends Error {
   }
 }
 
-export class AuthProviderMismatchException extends Error {
+export class AuthProviderMismatchError extends Error {
   constructor() {
     super('incorrect authentication provider.');
   }
@@ -50,7 +60,7 @@ export class AuthProviderMismatchException extends Error {
   }
 }
 
-export class LocalRegisterMismatchException extends Error {
+export class LocalRegisterMismatchError extends Error {
   constructor() {
     super('incorrect local register mismatch.');
   }
