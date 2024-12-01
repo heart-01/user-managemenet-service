@@ -17,6 +17,7 @@ dotenvExpand.expand(dotenv.config({ path: envFile }));
 export const NODE_ENV = process.env.NODE_ENV || '';
 export const PORT = process.env.PORT || 3000;
 export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
+export const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 export const TIMEZONE = process.env.TIMEZONE || 'Asia/Bangkok';
 
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
