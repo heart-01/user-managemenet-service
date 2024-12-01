@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import loggerService from '../src/services/logger.service';
+import { hashPassword } from '../src/utils/hashing';
 
 const prisma = new PrismaClient();
 
@@ -10,14 +11,14 @@ const seed = async () => {
         {
           name: 'John Doe',
           username: 'johndoe',
-          password: 'password',
+          password: await hashPassword('password'),
           email: 'john@email.com',
           status: 'ACTIVATED',
         },
         {
           name: 'Jane Smith',
           username: 'janesmith',
-          password: 'password',
+          password: await hashPassword('password'),
           email: 'jane@email.com',
           status: 'ACTIVATED',
         },
