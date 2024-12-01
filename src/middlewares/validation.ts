@@ -19,10 +19,12 @@ export type ValidationType = {
 };
 
 export const validateSchemaMiddleware =
-  (validation: ValidationType) => (request: Request, response: Response, next: NextFunction) => {
+  (validation: ValidationType) =>
+  (request: Request, response: Response, next: NextFunction): void => {
     try {
       const result = Joi.attempt(request[validation.options], validation.schema);
       request[validation.options] = result;
+      return next();
     } catch (error) {
       if (error instanceof ValidationError) {
         response.status(HTTP_RESPONSE_CODE.BAD_REQUEST).json({
@@ -30,8 +32,9 @@ export const validateSchemaMiddleware =
           context: error.details[0].context,
           path: error.details[0].path,
         });
+        return next(error);
       }
       response.status(HTTP_RESPONSE_CODE.BAD_REQUEST).send('Invalid request params');
+      return next(error);
     }
-    return next();
   };
