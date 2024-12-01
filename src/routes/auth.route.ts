@@ -2,6 +2,9 @@ import express from 'express';
 import authValidator from '../validators/auth.validator';
 import { validateSchemaMiddleware, JOI_OPTIONS } from '../middlewares/validation';
 import { authController } from '../controllers';
+import { authenticateMiddleware } from '../middlewares/authentication';
+import { authorizeMiddleware } from '../middlewares/authorize';
+import { Actions } from '../enums/ability.enum';
 
 const authRouter: express.Router = express.Router();
 
@@ -65,6 +68,56 @@ const authRouter: express.Router = express.Router();
  * @return {string} 500 - Internal Error - application/json
  */
 
+/**
+ * @typedef {object} verifyEmailRequest
+ * @property {string} token.required - Token to verify
+ */
+
+/**
+ * @typedef {object} verifyEmailSuccessResponse
+ * @property {string} token - token
+ * @property {string} userId - user id
+ * @property {string} type - action type for the token
+ * @property {string} createdAt - token creation timestamp
+ * @property {string} expiredAt - token expiration timestamp
+ * @property {string} completedAt - token completion timestamp
+ */
+
+/**
+ * POST /auth/verify/email
+ * @summary Verify Email
+ * @security bearerAuth
+ * @tags auth
+ * @param {verifyEmailRequest} request.body.required - Token to verify
+ * @return {verifyEmailSuccessResponse} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+
+/**
+ * Register Complete Request
+ * @typedef {object} RegisterCompleteRequest
+ * @property {string} userId - User's ID
+ * @property {string} password - User's password
+ * @property {string} confirmPassword - User's password confirmation
+ * @property {string} name - User's name
+ * @property {string} username - User's username
+ * @property {Array<string>} userPolicy - User's policy agreement
+ */
+
+/**
+ * POST /auth/local/register/complete
+ * @summary Complete Local Register
+ * @security bearerAuth
+ * @tags auth
+ * @param {RegisterCompleteRequest} request.body.required - User update request
+ * @return {AuthSuccessResponse} 200 - Success response - application/json
+ * @return {string} 404 - User not found - application/json
+ * @return {string} 400 - Bad request - application/json
+ * @return {string} 401 - Unauthorized - application/json
+ * @return {string} 403 - Forbidden - application/json
+ * @return {string} 500 - Internal server error - application/json
+ */
+
 authRouter.post(
   '/google/login',
   validateSchemaMiddleware({
@@ -81,6 +134,27 @@ authRouter.post(
     schema: authValidator.localRegister,
   }),
   authController.localRegister,
+);
+
+authRouter.post(
+  '/verify/email',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.verifyEmail,
+  }),
+  authController.verifyEmail,
+);
+
+authRouter.post(
+  '/local/register/complete',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.registerComplete,
+  }),
+  authorizeMiddleware(Actions.Create, 'registerComplete'),
+  authController.registerComplete,
 );
 
 export default authRouter;
