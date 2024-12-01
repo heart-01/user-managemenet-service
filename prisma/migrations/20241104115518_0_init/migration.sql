@@ -20,7 +20,7 @@ CREATE TABLE "users" (
     "phone_number" VARCHAR(20),
     "bio" TEXT,
     "username" VARCHAR(50),
-    "password" VARCHAR(50),
+    "password" VARCHAR(60),
     "email" VARCHAR(50) NOT NULL,
     "imageUrl" VARCHAR(255),
     "status" "USER_STATUS" NOT NULL,
@@ -90,6 +90,9 @@ CREATE TABLE "user_login_histories" (
 
     CONSTRAINT "user_login_histories_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
