@@ -32,6 +32,7 @@ const userRouter: express.Router = express.Router();
  * @return {UserSuccessResponse} 200 - Success response - application/json
  * @return {string} 404 - User not found - application/json
  */
+
 userRouter.get(
   '/:id',
   authenticateMiddleware,
