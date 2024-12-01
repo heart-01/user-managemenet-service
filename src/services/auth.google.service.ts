@@ -11,7 +11,7 @@ import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
 import {
-  AuthProviderMismatchException,
+  AuthProviderMismatchError,
   ConflictError,
   GoogleIdTokenMissingScopeError,
   ResponseError,
@@ -143,7 +143,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     // Case user provider is not google or unknown
     return {
       status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
-      data: new AuthProviderMismatchException(),
+      data: new AuthProviderMismatchError(),
     };
   } catch (error) {
     const err = error as Error;
