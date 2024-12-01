@@ -10,7 +10,7 @@ import { AppSubjects } from '../types/ability.type';
 export const authorizeMiddleware =
   (action: Actions, resource: AppSubjects) =>
   (request: AuthRequest, response: Response, next: NextFunction) => {
-    const resourceData = request.params || request.body;
+    const resourceData = { ...request.params, ...request.body };
     const subjectData = { ...resourceData };
 
     const ability = defineAbilitiesFor(request.user as UserType);
