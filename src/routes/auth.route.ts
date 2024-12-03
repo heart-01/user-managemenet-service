@@ -45,12 +45,12 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * @typedef {object} RegisterRequest
+ * @typedef {object} VerifyEmailExistRequest
  * @property {string} email.required - User's email address
  */
 
 /**
- * @typedef {object} RegisterSuccessResponse
+ * @typedef {object} VerifyEmailExistResponse
  * @property {string} token - token
  * @property {string} userId - user id
  * @property {string} type - action type for the token
@@ -60,11 +60,11 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * POST /auth/local/register
- * @summary Local Register
+ * POST /auth/verify/email/exist
+ * @summary Verify Email Exist
  * @tags auth
- * @param {RegisterRequest} request.body.required - User's email address
- * @return {RegisterSuccessResponse} 201 - Success response - application/json
+ * @param {VerifyEmailExistRequest} request.body.required - User's email address
+ * @return {VerifyEmailExistResponse} 201 - Success response - application/json
  * @return {string} 500 - Internal Error - application/json
  */
 
@@ -128,12 +128,12 @@ authRouter.post(
 );
 
 authRouter.post(
-  '/local/register',
+  '/verify/email/exist',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.localRegister,
+    schema: authValidator.verifyEmailExist,
   }),
-  authController.localRegister,
+  authController.verifyEmailExist,
 );
 
 authRouter.post(

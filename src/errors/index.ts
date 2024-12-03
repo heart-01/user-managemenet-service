@@ -60,9 +60,9 @@ export class AuthProviderMismatchError extends Error {
   }
 }
 
-export class LocalRegisterMismatchError extends Error {
+export class VerifyEmailExistMismatchError extends Error {
   constructor() {
-    super('incorrect local register mismatch.');
+    super('incorrect verify email mismatch.');
   }
 
   toJSON() {

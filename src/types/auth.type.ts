@@ -9,7 +9,7 @@ export type GoogleAuthType = {
   idToken: string;
 };
 
-export type LocalRegisterType = {
+export type VerifyEmailExistType = {
   email: string;
 };
 

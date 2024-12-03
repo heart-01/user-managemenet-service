@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import logger from '../services/logger.service';
 import {
   GoogleAuthType,
-  LocalRegisterType,
+  VerifyEmailExistType,
   RegisterCompleteType,
   VerifyEmailType,
 } from '../types/auth.type';
@@ -16,10 +16,10 @@ export const googleAuth = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
-export const localRegister = async (request: Request, response: Response) => {
+export const verifyEmailExist = async (request: Request, response: Response) => {
   logger.start(request);
-  const { email }: LocalRegisterType = request.body;
-  const result = await authLocalService.register(email);
+  const { email }: VerifyEmailExistType = request.body;
+  const result = await authLocalService.verifyEmailExist(email);
   response.status(result.status).send(result.data);
 
   logger.end(request);
@@ -51,7 +51,7 @@ export const registerComplete = async (request: Request, response: Response) => 
 
 export default {
   googleAuth,
-  localRegister,
+  verifyEmailExist,
   verifyEmail,
   registerComplete,
 };

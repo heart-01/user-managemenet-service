@@ -17,7 +17,7 @@ import { sendEmailWithTemplate } from '../utils/email';
 import {
   ConflictError,
   InvalidDataError,
-  LocalRegisterMismatchError,
+  VerifyEmailExistMismatchError,
   RecordNotFoundError,
   ResponseError,
 } from '../errors';
@@ -30,9 +30,11 @@ import {
   VerifyEmailResponseType,
 } from '../types/auth.type';
 
-const register = async (email: string): Promise<ResponseCommonType<EmailVerification | Error>> => {
+const verifyEmailExist = async (
+  email: string,
+): Promise<ResponseCommonType<EmailVerification | Error>> => {
   try {
-    loggerService.info('localRegister');
+    loggerService.info('verifyEmailExist');
     loggerService.debug('email', email);
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -145,7 +147,7 @@ const register = async (email: string): Promise<ResponseCommonType<EmailVerifica
 
     return {
       status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
-      data: new LocalRegisterMismatchError(),
+      data: new VerifyEmailExistMismatchError(),
     };
   } catch (error) {
     const err = error as Error;
@@ -297,7 +299,7 @@ const registerComplete = async (
 };
 
 export default {
-  register,
+  verifyEmailExist,
   verifyEmail,
   registerComplete,
 };
