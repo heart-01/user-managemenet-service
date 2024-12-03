@@ -18,7 +18,7 @@ const userPayloadSchema = Joi.object({
   name: Joi.string().required(),
 }).unknown(true);
 
-const registerComplete: Joi.ObjectSchema = Joi.object().keys({
+const register: Joi.ObjectSchema = Joi.object().keys({
   userId: Joi.string().guid({ version: 'uuidv4' }).required(),
   password: Joi.string()
     .required()
@@ -46,5 +46,5 @@ export default {
   verifyEmailExist,
   verifyEmail,
   userPayloadSchema,
-  registerComplete,
+  register,
 };

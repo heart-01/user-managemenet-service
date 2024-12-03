@@ -26,7 +26,7 @@ import { hashPassword } from '../utils/hashing';
 import {
   AuthResponseType,
   PayloadTokenVerifyEmailType,
-  RegisterCompleteType,
+  RegisterType,
   VerifyEmailResponseType,
 } from '../types/auth.type';
 
@@ -211,11 +211,11 @@ const verifyEmail = async (
   }
 };
 
-const registerComplete = async (
-  user: RegisterCompleteType,
+const register = async (
+  user: RegisterType,
 ): Promise<ResponseCommonType<AuthResponseType | Error>> => {
   try {
-    loggerService.info('registerComplete');
+    loggerService.info('register');
     loggerService.debug('user', user);
 
     if (user.password !== user.confirmPassword) {
@@ -301,5 +301,5 @@ const registerComplete = async (
 export default {
   verifyEmailExist,
   verifyEmail,
-  registerComplete,
+  register,
 };

@@ -3,7 +3,7 @@ import logger from '../services/logger.service';
 import {
   GoogleAuthType,
   VerifyEmailExistType,
-  RegisterCompleteType,
+  RegisterType,
   VerifyEmailType,
 } from '../types/auth.type';
 import { authGoogleService, authLocalService } from '../services';
@@ -33,11 +33,11 @@ export const verifyEmail = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
-export const registerComplete = async (request: Request, response: Response) => {
+export const register = async (request: Request, response: Response) => {
   logger.start(request);
   const { userId, password, confirmPassword, userPolicy, name, username } =
-    request.body as RegisterCompleteType;
-  const result = await authLocalService.registerComplete({
+    request.body as RegisterType;
+  const result = await authLocalService.register({
     userId,
     password,
     confirmPassword,
@@ -53,5 +53,5 @@ export default {
   googleAuth,
   verifyEmailExist,
   verifyEmail,
-  registerComplete,
+  register,
 };

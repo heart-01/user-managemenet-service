@@ -94,8 +94,8 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * Register Complete Request
- * @typedef {object} RegisterCompleteRequest
+ * Register Request
+ * @typedef {object} RegisterRequest
  * @property {string} userId - User's ID
  * @property {string} password - User's password
  * @property {string} confirmPassword - User's password confirmation
@@ -105,11 +105,11 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * POST /auth/local/register/complete
- * @summary Complete Local Register
+ * POST /auth/local/register
+ * @summary Local Register
  * @security bearerAuth
  * @tags auth
- * @param {RegisterCompleteRequest} request.body.required - User update request
+ * @param {RegisterRequest} request.body.required - User update request
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 404 - User not found - application/json
  * @return {string} 400 - Bad request - application/json
@@ -147,14 +147,14 @@ authRouter.post(
 );
 
 authRouter.post(
-  '/local/register/complete',
+  '/local/register',
   authenticateMiddleware,
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.registerComplete,
+    schema: authValidator.register,
   }),
-  authorizeMiddleware(Actions.Create, 'registerComplete'),
-  authController.registerComplete,
+  authorizeMiddleware(Actions.Create, 'register'),
+  authController.register,
 );
 
 export default authRouter;

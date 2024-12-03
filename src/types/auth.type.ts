@@ -33,7 +33,7 @@ export type PayloadTokenVerifyEmailType = {
   token: string;
 };
 
-export type RegisterCompleteType = {
+export type RegisterType = {
   userId: string;
   password: string;
   confirmPassword: string;
