@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { ACTION_TYPE } from '../config/database';
 
 const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
@@ -10,6 +11,7 @@ const verifyEmailExist: Joi.ObjectSchema = Joi.object().keys({
 
 const verifyEmail: Joi.ObjectSchema = Joi.object().keys({
   token: Joi.string().required(),
+  type: Joi.string().valid(...Object.values(ACTION_TYPE)),
 });
 
 const userPayloadSchema = Joi.object({
@@ -41,10 +43,30 @@ const register: Joi.ObjectSchema = Joi.object().keys({
     .pattern(/^(?=.*[a-zA-Z])[a-zA-Z0-9_.]+$/),
 });
 
+const verifyEmailResetPassword: Joi.ObjectSchema = Joi.object().keys({
+  email: Joi.string().email().required(),
+});
+
+const resetPassword: Joi.ObjectSchema = Joi.object().keys({
+  userId: Joi.string().guid({ version: 'uuidv4' }).required(),
+  password: Joi.string()
+    .required()
+    .min(8)
+    .max(20)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
+  confirmPassword: Joi.string()
+    .required()
+    .min(8)
+    .max(20)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
+});
+
 export default {
   googleAuth,
   verifyEmailExist,
   verifyEmail,
   userPayloadSchema,
   register,
+  verifyEmailResetPassword,
+  resetPassword,
 };
