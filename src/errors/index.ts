@@ -69,3 +69,13 @@ export class VerifyEmailExistMismatchError extends Error {
     return this.message;
   }
 }
+
+export class ResetPasswordMismatchError extends Error {
+  constructor() {
+    super('incorrect reset password mismatch.');
+  }
+
+  toJSON() {
+    return this.message;
+  }
+}
