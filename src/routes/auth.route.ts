@@ -30,6 +30,16 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
+ * @typedef {object} EmailVerificationResponse
+ * @property {string} token - token
+ * @property {string} userId - user id
+ * @property {string} type - action type for the token
+ * @property {string} createdAt - token creation timestamp
+ * @property {string} expiredAt - token expiration timestamp
+ * @property {string} completedAt - token completion timestamp
+ */
+
+/**
  * @typedef {object} GoogleAuthRequest
  * @property {string} idToken.required - Google Auth idToken
  */
@@ -50,27 +60,18 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * @typedef {object} VerifyEmailExistResponse
- * @property {string} token - token
- * @property {string} userId - user id
- * @property {string} type - action type for the token
- * @property {string} createdAt - token creation timestamp
- * @property {string} expiredAt - token expiration timestamp
- * @property {string} completedAt - token completion timestamp
- */
-
-/**
  * POST /auth/verify/email/exist
  * @summary Verify Email Exist
  * @tags auth
  * @param {VerifyEmailExistRequest} request.body.required - User's email address
- * @return {VerifyEmailExistResponse} 201 - Success response - application/json
+ * @return {EmailVerificationResponse} 201 - Success response - application/json
  * @return {string} 500 - Internal Error - application/json
  */
 
 /**
  * @typedef {object} verifyEmailRequest
  * @property {string} token.required - Token to verify
+ * @property {string} type.required - Token type
  */
 
 /**
@@ -118,6 +119,43 @@ const authRouter: express.Router = express.Router();
  * @return {string} 500 - Internal server error - application/json
  */
 
+/**
+ * @typedef {object} VerifyEmailResetPasswordRequest
+ * @property {string} email.required - User's email address
+ */
+
+/**
+ * POST /auth/verify/email/reset-password
+ * @summary Verify Email Reset Password
+ * @tags auth
+ * @param {VerifyEmailResetPasswordRequest} request.body.required - User's email address
+ * @return {EmailVerificationResponse} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+
+/**
+ * @typedef {object} ResetPasswordRequest
+ * @property {string} userId - User's ID
+ * @property {string} password.required - New password
+ * @property {string} confirmPassword.required - New password confirmation
+ */
+
+/**
+ * @typedef {object} ResetPasswordResponse
+ * @property {User} user - User data
+ */
+
+/**
+ * POST /auth/local/reset-password
+ * @summary Local Reset Password
+ * @tags auth
+ * @param {ResetPasswordRequest} request.body.required - User reset password request
+ * @return {ResetPasswordResponse} 201 - Success response - application/json
+ * @return {string} 400 - Bad request - application/json
+ * @return {string} 404 - User not found - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+
 authRouter.post(
   '/google/login',
   validateSchemaMiddleware({
@@ -155,6 +193,25 @@ authRouter.post(
   }),
   authorizeMiddleware(Actions.Create, 'register'),
   authController.register,
+);
+
+authRouter.post(
+  '/verify/email/reset-password',
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.verifyEmailResetPassword,
+  }),
+  authController.verifyEmailResetPassword,
+);
+
+authRouter.post(
+  '/local/reset-password',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.resetPassword,
+  }),
+  authController.resetPassword,
 );
 
 export default authRouter;
