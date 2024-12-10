@@ -5,6 +5,8 @@ import {
   VerifyEmailExistType,
   RegisterType,
   VerifyEmailType,
+  VerifyEmailResetPasswordType,
+  ResetPasswordType,
 } from '../types/auth.type';
 import { authGoogleService, authLocalService } from '../services';
 
@@ -27,8 +29,8 @@ export const verifyEmailExist = async (request: Request, response: Response) => 
 
 export const verifyEmail = async (request: Request, response: Response) => {
   logger.start(request);
-  const { token }: VerifyEmailType = request.body;
-  const result = await authLocalService.verifyEmail(token);
+  const { token, type }: VerifyEmailType = request.body;
+  const result = await authLocalService.verifyEmail(token, type);
   response.status(result.status).send(result.data);
   logger.end(request);
 };
@@ -49,9 +51,27 @@ export const register = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
+export const verifyEmailResetPassword = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { email }: VerifyEmailResetPasswordType = request.body;
+  const result = await authLocalService.verifyEmailResetPassword(email);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
+export const resetPassword = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { userId, password, confirmPassword }: ResetPasswordType = request.body;
+  const result = await authLocalService.resetPassword({ userId, password, confirmPassword });
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
 export default {
   googleAuth,
   verifyEmailExist,
   verifyEmail,
   register,
+  verifyEmailResetPassword,
+  resetPassword,
 };
