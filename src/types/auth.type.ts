@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { UserType } from './users.type';
+import { ACTION_TYPE } from '../config/database';
 
 export type AuthRequest = Request & {
   user?: UserType;
@@ -21,6 +22,7 @@ export type AuthResponseType = {
 
 export type VerifyEmailType = {
   token: string;
+  type: ACTION_TYPE;
 };
 
 export type VerifyEmailResponseType = {
@@ -40,4 +42,23 @@ export type RegisterType = {
   userPolicy: Array<string>;
   name: string;
   username: string;
+};
+
+export type VerifyEmailResetPasswordType = {
+  email: string;
+};
+
+export type PayloadTokenResetPasswordType = {
+  id: string;
+  token: string;
+};
+
+export type ResetPasswordType = {
+  userId: string;
+  password: string;
+  confirmPassword: string;
+};
+
+export type ResetPasswordResponseType = {
+  user: UserType;
 };
