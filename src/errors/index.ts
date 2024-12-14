@@ -60,7 +60,7 @@ export class AuthProviderMismatchError extends Error {
   }
 }
 
-export class VerifyEmailExistMismatchError extends Error {
+export class SendEmailRegisterMismatchError extends Error {
   constructor() {
     super('incorrect verify email mismatch.');
   }
@@ -70,7 +70,7 @@ export class VerifyEmailExistMismatchError extends Error {
   }
 }
 
-export class ResetPasswordMismatchError extends Error {
+export class SendEmailResetPasswordMismatchError extends Error {
   constructor() {
     super('incorrect reset password mismatch.');
   }
