@@ -1,5 +1,5 @@
 import sgMail from '../config/sendGridMail';
-import { SENDGRID_SENDER_EMAIL } from '../config/dotenv';
+import { CLIENT_URL, SENDGRID_SENDER_EMAIL } from '../config/dotenv';
 
 export type SendEmailWithTemplateOptions = {
   to: string;
@@ -21,6 +21,11 @@ export const sendEmailWithTemplate = async ({
     templateId,
     dynamic_template_data: dynamicTemplateData,
   };
-
   await sgMail.send(msg);
 };
+
+export const generateUrlEmailVerifyRegister = (accessToken: string): string =>
+  `${CLIENT_URL}/verify/register?token=${accessToken}`;
+
+export const generateUrlEmailVerifyResetPassword = (accessToken: string): string =>
+  `${CLIENT_URL}/verify/reset-password?token=${accessToken}`;
