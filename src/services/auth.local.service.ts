@@ -5,7 +5,6 @@ import loggerService from './logger.service';
 import dayjs from '../config/dayjs';
 import {
   ACCESS_TOKEN_EXPIRES_IN,
-  CLIENT_URL,
   JWT_SECRET,
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
@@ -14,14 +13,18 @@ import { prisma, Prisma, USER_STATUS, ACTION_TYPE, runTransaction } from '../con
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
-import { sendEmailWithTemplate } from '../utils/email';
+import {
+  generateUrlEmailVerifyRegister,
+  generateUrlEmailVerifyResetPassword,
+  sendEmailWithTemplate,
+} from '../utils/email';
 import {
   ConflictError,
   InvalidDataError,
-  VerifyEmailExistMismatchError,
+  SendEmailRegisterMismatchError,
   RecordNotFoundError,
   ResponseError,
-  ResetPasswordMismatchError,
+  SendEmailResetPasswordMismatchError,
 } from '../errors';
 import { generateToken } from '../utils/token';
 import { hashPassword } from '../utils/hashing';
@@ -34,12 +37,13 @@ import {
   ResetPasswordType,
   VerifyEmailResponseType,
 } from '../types/auth.type';
+import { EmailSubject } from '../enums/email.enum';
 
-const verifyEmailExist = async (
+const sendEmailRegister = async (
   email: string,
 ): Promise<ResponseCommonType<EmailVerification | Error>> => {
   try {
-    loggerService.info('verifyEmailExist');
+    loggerService.info('sendEmailRegister');
     loggerService.debug('email', email);
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -86,10 +90,10 @@ const verifyEmailExist = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: 'Investnity - Verify your email address',
+          subject: EmailSubject.Register,
           templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
           dynamicTemplateData: {
-            verificationLink: `${CLIENT_URL}/api/auth/verify/email?token=${accessToken}`,
+            verificationLink: generateUrlEmailVerifyRegister(accessToken),
           },
         });
         return {
@@ -107,10 +111,10 @@ const verifyEmailExist = async (
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         await sendEmailWithTemplate({
           to: email,
-          subject: 'Investnity - Verify your email address',
+          subject: EmailSubject.Register,
           templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
           dynamicTemplateData: {
-            verificationLink: `${CLIENT_URL}/api/auth/verify/email?token=${accessToken}`,
+            verificationLink: generateUrlEmailVerifyRegister(accessToken),
           },
         });
         return {
@@ -138,10 +142,10 @@ const verifyEmailExist = async (
       });
       await sendEmailWithTemplate({
         to: email,
-        subject: 'Investnity - Verify your email address',
+        subject: EmailSubject.Register,
         templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
         dynamicTemplateData: {
-          verificationLink: `${CLIENT_URL}/api/auth/verify/email?token=${accessToken}`,
+          verificationLink: generateUrlEmailVerifyRegister(accessToken),
         },
       });
       return {
@@ -152,7 +156,7 @@ const verifyEmailExist = async (
 
     return {
       status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
-      data: new VerifyEmailExistMismatchError(),
+      data: new SendEmailRegisterMismatchError(),
     };
   } catch (error) {
     const err = error as Error;
@@ -300,11 +304,11 @@ const register = async (
   }
 };
 
-const verifyEmailResetPassword = async (
+const sendEmailResetPassword = async (
   email: string,
 ): Promise<ResponseCommonType<EmailVerification | Error>> => {
   try {
-    loggerService.info('verifyEmailResetPassword');
+    loggerService.info('sendEmailResetPassword');
     loggerService.debug('email', email);
 
     const user = await prisma.user.findUnique({ where: { email } });
@@ -354,10 +358,10 @@ const verifyEmailResetPassword = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: 'Investnity - Reset your password',
+          subject: EmailSubject.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
-            verificationLink: `${CLIENT_URL}/api/auth/verify/reset-password?token=${accessToken}`,
+            verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
           },
         });
         return {
@@ -381,10 +385,10 @@ const verifyEmailResetPassword = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: 'Investnity - Reset your password',
+          subject: EmailSubject.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
-            verificationLink: `${CLIENT_URL}/api/auth/verify/reset-password?token=${accessToken}`,
+            verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
           },
         });
         return {
@@ -402,10 +406,10 @@ const verifyEmailResetPassword = async (
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         await sendEmailWithTemplate({
           to: email,
-          subject: 'Investnity - Reset your password',
+          subject: EmailSubject.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
-            verificationLink: `${CLIENT_URL}/api/auth/verify/reset-password?token=${accessToken}`,
+            verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
           },
         });
         return {
@@ -417,7 +421,7 @@ const verifyEmailResetPassword = async (
 
     return {
       status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
-      data: new ResetPasswordMismatchError(),
+      data: new SendEmailResetPasswordMismatchError(),
     };
   } catch (error) {
     const err = error as Error;
@@ -483,9 +487,9 @@ const resetPassword = async (
 };
 
 export default {
-  verifyEmailExist,
+  sendEmailRegister,
   verifyEmail,
   register,
-  verifyEmailResetPassword,
+  sendEmailResetPassword,
   resetPassword,
 };

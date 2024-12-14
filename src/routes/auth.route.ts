@@ -55,15 +55,15 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * @typedef {object} VerifyEmailExistRequest
+ * @typedef {object} SendEmailRegisterRequest
  * @property {string} email.required - User's email address
  */
 
 /**
- * POST /auth/verify/email/exist
- * @summary Verify Email Exist
+ * POST /auth/send/email/register
+ * @summary Send Email Register
  * @tags auth
- * @param {VerifyEmailExistRequest} request.body.required - User's email address
+ * @param {SendEmailRegisterRequest} request.body.required - User's email address
  * @return {EmailVerificationResponse} 201 - Success response - application/json
  * @return {string} 500 - Internal Error - application/json
  */
@@ -120,15 +120,15 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * @typedef {object} VerifyEmailResetPasswordRequest
+ * @typedef {object} SendEmailResetPasswordRequest
  * @property {string} email.required - User's email address
  */
 
 /**
- * POST /auth/verify/email/reset-password
- * @summary Verify Email Reset Password
+ * POST /auth/send/email/reset-password
+ * @summary Send Email Reset Password
  * @tags auth
- * @param {VerifyEmailResetPasswordRequest} request.body.required - User's email address
+ * @param {SendEmailResetPasswordRequest} request.body.required - User's email address
  * @return {EmailVerificationResponse} 201 - Success response - application/json
  * @return {string} 500 - Internal Error - application/json
  */
@@ -166,12 +166,12 @@ authRouter.post(
 );
 
 authRouter.post(
-  '/verify/email/exist',
+  '/send/email/register',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.verifyEmailExist,
+    schema: authValidator.sendEmailRegister,
   }),
-  authController.verifyEmailExist,
+  authController.sendEmailRegister,
 );
 
 authRouter.post(
@@ -196,12 +196,12 @@ authRouter.post(
 );
 
 authRouter.post(
-  '/verify/email/reset-password',
+  '/send/email/reset-password',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.verifyEmailResetPassword,
+    schema: authValidator.sendEmailResetPassword,
   }),
-  authController.verifyEmailResetPassword,
+  authController.sendEmailResetPassword,
 );
 
 authRouter.post(

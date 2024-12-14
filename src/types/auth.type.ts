@@ -10,7 +10,7 @@ export type GoogleAuthType = {
   idToken: string;
 };
 
-export type VerifyEmailExistType = {
+export type SendEmailRegisterType = {
   email: string;
 };
 
@@ -44,7 +44,7 @@ export type RegisterType = {
   username: string;
 };
 
-export type VerifyEmailResetPasswordType = {
+export type SendEmailResetPasswordType = {
   email: string;
 };
 

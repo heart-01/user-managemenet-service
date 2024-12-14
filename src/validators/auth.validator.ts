@@ -5,7 +5,7 @@ const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
 });
 
-const verifyEmailExist: Joi.ObjectSchema = Joi.object().keys({
+const sendEmailRegister: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
 });
 
@@ -43,7 +43,7 @@ const register: Joi.ObjectSchema = Joi.object().keys({
     .pattern(/^(?=.*[a-zA-Z])[a-zA-Z0-9_.]+$/),
 });
 
-const verifyEmailResetPassword: Joi.ObjectSchema = Joi.object().keys({
+const sendEmailResetPassword: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
 });
 
@@ -63,10 +63,10 @@ const resetPassword: Joi.ObjectSchema = Joi.object().keys({
 
 export default {
   googleAuth,
-  verifyEmailExist,
+  sendEmailRegister,
   verifyEmail,
   userPayloadSchema,
   register,
-  verifyEmailResetPassword,
+  sendEmailResetPassword,
   resetPassword,
 };
