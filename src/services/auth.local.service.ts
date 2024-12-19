@@ -6,6 +6,7 @@ import dayjs from '../config/dayjs';
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   JWT_SECRET,
+  SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
 } from '../config/dotenv';
@@ -463,6 +464,15 @@ const resetPassword = async (
         status: true,
         createdAt: true,
         updatedAt: true,
+      },
+    });
+
+    await sendEmailWithTemplate({
+      to: result.email,
+      subject: EmailSubject.ChangePassword,
+      templateId: SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
+      dynamicTemplateData: {
+        username: result.username,
       },
     });
 
