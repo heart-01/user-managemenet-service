@@ -26,9 +26,10 @@ import {
   RecordNotFoundError,
   ResponseError,
   SendEmailResetPasswordMismatchError,
+  AuthLocalMismatchError,
 } from '../errors';
 import { generateToken } from '../utils/token';
-import { hashPassword } from '../utils/hashing';
+import { hashPassword, verifyPassword } from '../utils/hashing';
 import {
   AuthResponseType,
   PayloadTokenResetPasswordType,
@@ -39,6 +40,79 @@ import {
   VerifyEmailResponseType,
 } from '../types/auth.type';
 import { EmailSubject } from '../enums/email.enum';
+
+const login = async (
+  email: string,
+  password: string,
+): Promise<ResponseCommonType<AuthResponseType | Error>> => {
+  try {
+    loggerService.info('localLogin');
+    loggerService.debug('email', email);
+    loggerService.debug('password', password);
+
+    const user = await prisma.user.findUnique({ where: { email } });
+
+    // Case user not found
+    if (!user) {
+      return {
+        status: HTTP_RESPONSE_CODE.NOT_FOUND,
+        data: new RecordNotFoundError('Invalid email or password. Please try again.'),
+      };
+    }
+
+    // Case user status is pending
+    if (user && user.status === USER_STATUS.PENDING) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: new ConflictError('User not activated.'),
+      };
+    }
+
+    // Case user login success
+    if (user && user.status === USER_STATUS.ACTIVATED) {
+      if (!user.password) {
+        return {
+          status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
+          data: new InvalidDataError('Invalid email or password. Please try again.'),
+        };
+      }
+
+      // Verify password
+      const isPasswordMatch = await verifyPassword(password, user.password);
+
+      // Case password not match
+      if (!isPasswordMatch) {
+        return {
+          status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
+          data: new InvalidDataError('Invalid email or password. Please try again.'),
+        };
+      }
+
+      const accessToken = generateToken(
+        { id: user.id, name: user.name },
+        JWT_SECRET,
+        ACCESS_TOKEN_EXPIRES_IN,
+      );
+
+      return {
+        status: HTTP_RESPONSE_CODE.OK,
+        data: { user, accessToken, isFirstTimeLogin: false },
+      };
+    }
+
+    // Case user login is mismatch
+    return {
+      status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
+      data: new AuthLocalMismatchError(),
+    };
+  } catch (error) {
+    const err = error as Error;
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: new ResponseError(err.message),
+    };
+  }
+};
 
 const sendEmailRegister = async (
   email: string,
@@ -497,6 +571,7 @@ const resetPassword = async (
 };
 
 export default {
+  login,
   sendEmailRegister,
   verifyEmail,
   register,

@@ -55,6 +55,22 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
+ * @typedef {object} LocalAuthRequest
+ * @property {string} email.required - User's email address
+ * @property {string} password.required - User's password
+ */
+
+/**
+ * POST /auth/local/login
+ * @summary Local Auth
+ * @tags auth
+ * @param {LocalAuthRequest} request.body.required - User's email and password
+ * @return {AuthSuccessResponse} 200 - Success response - application/json
+ * @return {string} 401 - Unauthorized - application/json
+ * @return {string} 409 - Conflict Error - application/json
+ */
+
+/**
  * @typedef {object} SendEmailRegisterRequest
  * @property {string} email.required - User's email address
  */
@@ -163,6 +179,15 @@ authRouter.post(
     schema: authValidator.googleAuth,
   }),
   authController.googleAuth,
+);
+
+authRouter.post(
+  '/local/login',
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.localAuth,
+  }),
+  authController.localAuth,
 );
 
 authRouter.post(

@@ -7,6 +7,7 @@ import {
   VerifyEmailType,
   SendEmailResetPasswordType,
   ResetPasswordType,
+  LocalAuthType,
 } from '../types/auth.type';
 import { authGoogleService, authLocalService } from '../services';
 
@@ -14,6 +15,14 @@ export const googleAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { idToken }: GoogleAuthType = request.body;
   const result = await authGoogleService.login(idToken);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
+export const localAuth = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { email, password }: LocalAuthType = request.body;
+  const result = await authLocalService.login(email, password);
   response.status(result.status).send(result.data);
   logger.end(request);
 };
@@ -69,6 +78,7 @@ export const resetPassword = async (request: Request, response: Response) => {
 
 export default {
   googleAuth,
+  localAuth,
   sendEmailRegister,
   verifyEmail,
   register,

@@ -19,7 +19,7 @@ import {
 
 const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseType | Error>> => {
   try {
-    loggerService.info('googleAuthVerifyToken');
+    loggerService.info('googleLogin');
     loggerService.debug('token', idToken);
 
     // Verify idToken
