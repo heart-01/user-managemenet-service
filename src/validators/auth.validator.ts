@@ -5,6 +5,15 @@ const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
 });
 
+const localAuth: Joi.ObjectSchema = Joi.object().keys({
+  email: Joi.string().email().required(),
+  password: Joi.string()
+    .required()
+    .min(8)
+    .max(20)
+    .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
+});
+
 const sendEmailRegister: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
 });
@@ -63,6 +72,7 @@ const resetPassword: Joi.ObjectSchema = Joi.object().keys({
 
 export default {
   googleAuth,
+  localAuth,
   sendEmailRegister,
   verifyEmail,
   userPayloadSchema,
