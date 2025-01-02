@@ -60,6 +60,16 @@ export class AuthProviderMismatchError extends Error {
   }
 }
 
+export class AuthLocalMismatchError extends Error {
+  constructor() {
+    super('incorrect authentication local.');
+  }
+
+  toJSON() {
+    return this.message;
+  }
+}
+
 export class SendEmailRegisterMismatchError extends Error {
   constructor() {
     super('incorrect verify email mismatch.');
