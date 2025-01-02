@@ -6,6 +6,11 @@ export type AuthRequest = Request & {
   user?: UserType;
 };
 
+export type LocalAuthType = {
+  email: string;
+  password: string;
+};
+
 export type GoogleAuthType = {
   idToken: string;
 };
