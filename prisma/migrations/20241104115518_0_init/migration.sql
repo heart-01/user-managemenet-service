@@ -24,6 +24,7 @@ CREATE TABLE "users" (
     "email" VARCHAR(50) NOT NULL,
     "imageUrl" VARCHAR(255),
     "status" "USER_STATUS" NOT NULL,
+    "latest_login_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
@@ -71,7 +72,7 @@ CREATE TABLE "user_policies" (
     "id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
     "policy_id" UUID NOT NULL,
-    "agreed_at" TIMESTAMP(3) NOT NULL,
+    "agreed_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "user_policies_pkey" PRIMARY KEY ("id")
 );
