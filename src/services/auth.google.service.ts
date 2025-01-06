@@ -53,6 +53,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         email: true,
         imageUrl: true,
         status: true,
+        latestLoginAt: true,
         createdAt: true,
         updatedAt: true,
       },
@@ -66,6 +67,15 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
 
     // Case user used to login with google before
     if (user && authProvider) {
+      // Update latest login time
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          latestLoginAt: new Date(),
+        },
+      });
       const accessToken = generateToken(
         { id: user.id, name: user.name },
         JWT_SECRET,
@@ -103,6 +113,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
             email: true,
             imageUrl: true,
             status: true,
+            latestLoginAt: true,
             createdAt: true,
             updatedAt: true,
           },
@@ -121,7 +132,6 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         const createUserPolices = policies.map((policy) => ({
           userId: newUser.id,
           policyId: policy.id,
-          agreedAt: new Date(),
         }));
         await prismaTransaction.userPolicy.createMany({
           data: createUserPolices,

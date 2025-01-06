@@ -18,6 +18,7 @@ const authRouter: express.Router = express.Router();
  * @property {string} email - User's email address
  * @property {string} imageUrl - URL to user's profile image
  * @property {string} status - User's status
+ * @property {string} latestLoginAt - Last login timestamp
  * @property {string} createdAt - Account creation timestamp
  * @property {string} updatedAt - Last update timestamp
  */

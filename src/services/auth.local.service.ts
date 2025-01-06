@@ -88,6 +88,16 @@ const login = async (
         };
       }
 
+      // Update latest login time
+      await prisma.user.update({
+        where: {
+          id: user.id,
+        },
+        data: {
+          latestLoginAt: new Date(),
+        },
+      });
+
       const accessToken = generateToken(
         { id: user.id, name: user.name },
         JWT_SECRET,
@@ -320,7 +330,6 @@ const register = async (
     const userPolicyData: Prisma.UserPolicyCreateManyInput[] = user.userPolicy.map((policyId) => ({
       userId: user.userId,
       policyId,
-      agreedAt: new Date(),
     }));
 
     const result = await runTransaction(async (prismaTransaction) => {
@@ -341,6 +350,7 @@ const register = async (
           email: true,
           imageUrl: true,
           status: true,
+          latestLoginAt: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -536,6 +546,7 @@ const resetPassword = async (
         email: true,
         imageUrl: true,
         status: true,
+        latestLoginAt: true,
         createdAt: true,
         updatedAt: true,
       },

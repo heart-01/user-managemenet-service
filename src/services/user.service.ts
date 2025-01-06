@@ -21,6 +21,7 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
         email: true,
         imageUrl: true,
         status: true,
+        latestLoginAt: true,
         createdAt: true,
         updatedAt: true,
       },
