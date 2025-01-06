@@ -52,6 +52,7 @@ model User {
   email             String              @unique @map("email") @db.VarChar(50)
   imageUrl          String?             @map("imageUrl") @db.VarChar(255)
   status            USER_STATUS         @map("status")
+  latestLoginAt     DateTime            @default(now()) @map("latest_login_at") @db.Timestamptz(3)
   createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime            @default(now()) @map("updated_at") @db.Timestamptz(3)
   AuthProvider      AuthProvider[]
@@ -103,7 +104,7 @@ model UserPolicy {
   id       String   @id @default(uuid()) @db.Uuid
   userId   String   @map("user_id") @db.Uuid
   policyId String   @map("policy_id") @db.Uuid
-  agreedAt DateTime @map("agreed_at") @db.Timestamp(3)
+  agreedAt DateTime @default(now()) @map("agreed_at") @db.Timestamptz(3)
 
   user   User   @relation(fields: [userId], references: [id])
   policy Policy @relation(fields: [policyId], references: [id])
