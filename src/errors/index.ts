@@ -59,33 +59,3 @@ export class AuthProviderMismatchError extends Error {
     return this.message;
   }
 }
-
-export class AuthLocalMismatchError extends Error {
-  constructor() {
-    super('incorrect authentication local.');
-  }
-
-  toJSON() {
-    return this.message;
-  }
-}
-
-export class SendEmailRegisterMismatchError extends Error {
-  constructor() {
-    super('incorrect verify email mismatch.');
-  }
-
-  toJSON() {
-    return this.message;
-  }
-}
-
-export class SendEmailResetPasswordMismatchError extends Error {
-  constructor() {
-    super('incorrect reset password mismatch.');
-  }
-
-  toJSON() {
-    return this.message;
-  }
-}
