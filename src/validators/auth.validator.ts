@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ACTION_TYPE } from '../config/database';
+import { ACTION_TYPE } from '../enums/prisma.enum';
 
 const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),

@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { UserType } from './users.type';
-import { ACTION_TYPE } from '../config/database';
+import { ACTION_TYPE } from '../enums/prisma.enum';
 
 export type AuthRequest = Request & {
   user?: UserType;
@@ -44,7 +44,7 @@ export type RegisterType = {
   userId: string;
   password: string;
   confirmPassword: string;
-  userPolicy: Array<string>;
+  userPolicy: string[];
   name: string;
   username: string;
 };
