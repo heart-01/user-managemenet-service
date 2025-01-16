@@ -7,6 +7,7 @@ export default {
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/src/config',
+    '<rootDir>/src/errors',
     '<rootDir>/src/dto',
     '<rootDir>/src/enums',
     '<rootDir>/src/utils',
