@@ -10,7 +10,8 @@ import {
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
 } from '../config/dotenv';
-import { prisma, Prisma, USER_STATUS, ACTION_TYPE, runTransaction } from '../config/database';
+import { prisma, Prisma, runTransaction } from '../config/database';
+import { USER_STATUS, ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
@@ -19,15 +20,7 @@ import {
   generateUrlEmailVerifyResetPassword,
   sendEmailWithTemplate,
 } from '../utils/email';
-import {
-  ConflictError,
-  InvalidDataError,
-  SendEmailRegisterMismatchError,
-  RecordNotFoundError,
-  ResponseError,
-  SendEmailResetPasswordMismatchError,
-  AuthLocalMismatchError,
-} from '../errors';
+import { ConflictError, InvalidDataError, RecordNotFoundError, ResponseError } from '../errors';
 import { generateToken } from '../utils/token';
 import { hashPassword, verifyPassword } from '../utils/hashing';
 import {
@@ -51,14 +44,6 @@ const login = async (
     loggerService.debug('password', password);
 
     const user = await prisma.user.findUnique({ where: { email } });
-
-    // Case user not found
-    if (!user) {
-      return {
-        status: HTTP_RESPONSE_CODE.NOT_FOUND,
-        data: new RecordNotFoundError('Invalid email or password. Please try again.'),
-      };
-    }
 
     // Case user status is pending
     if (user && user.status === USER_STATUS.PENDING) {
@@ -106,14 +91,30 @@ const login = async (
 
       return {
         status: HTTP_RESPONSE_CODE.OK,
-        data: { user, accessToken, isFirstTimeLogin: false },
+        data: {
+          user: {
+            id: user.id,
+            bio: user.bio,
+            username: user.username,
+            email: user.email,
+            imageUrl: user.imageUrl,
+            name: user.name,
+            phoneNumber: user.phoneNumber,
+            status: user.status,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+            latestLoginAt: user.latestLoginAt,
+          },
+          accessToken,
+          isFirstTimeLogin: false,
+        },
       };
     }
 
     // Case user login is mismatch
     return {
-      status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
-      data: new AuthLocalMismatchError(),
+      status: HTTP_RESPONSE_CODE.NOT_FOUND,
+      data: new RecordNotFoundError('Invalid email or password. Please try again.'),
     };
   } catch (error) {
     const err = error as Error;
@@ -142,8 +143,9 @@ const sendEmailRegister = async (
     }
 
     // Config expiredAt for email verification
-    const expiredAt = dayjs().add(1, 'd').toDate();
-    const tokenExpiresIn = Math.floor((expiredAt.getTime() - Date.now()) / 1000); // Duration in seconds
+    const currentDate = dayjs();
+    const expiredAt = currentDate.add(1, 'd').toDate();
+    const tokenExpiresIn = Math.floor((expiredAt.getTime() - currentDate.valueOf()) / 1000); // Duration in seconds
 
     // Case user registered but not activated
     if (user && user.status === USER_STATUS.PENDING) {
@@ -157,7 +159,7 @@ const sendEmailRegister = async (
         },
       });
       const isEmailExpired =
-        emailVerification && dayjs().isAfter(dayjs(emailVerification.expiredAt));
+        emailVerification && currentDate.isAfter(dayjs(emailVerification.expiredAt));
       const isTokenCompleted = emailVerification && emailVerification.completedAt;
 
       // Case email verification is expired or token is completed
@@ -210,38 +212,31 @@ const sendEmailRegister = async (
     }
 
     // Case user not registered before
-    if (!user) {
-      const newUser: UserType = await prisma.user.create({
-        data: { email, status: USER_STATUS.PENDING },
-      });
-      const token = uuidv4();
-      const payload: PayloadTokenVerifyEmailType = { id: newUser.id, token };
-      const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
-      const newEmailVerification = await prisma.emailVerification.create({
-        data: {
-          userId: newUser.id,
-          token,
-          expiredAt,
-          type: ACTION_TYPE.REGISTER,
-        },
-      });
-      await sendEmailWithTemplate({
-        to: email,
-        subject: EmailSubject.Register,
-        templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
-        dynamicTemplateData: {
-          verificationLink: generateUrlEmailVerifyRegister(accessToken),
-        },
-      });
-      return {
-        status: HTTP_RESPONSE_CODE.CREATED,
-        data: newEmailVerification,
-      };
-    }
-
+    const newUser: UserType = await prisma.user.create({
+      data: { email, status: USER_STATUS.PENDING },
+    });
+    const token = uuidv4();
+    const payload: PayloadTokenVerifyEmailType = { id: newUser.id, token };
+    const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
+    const newEmailVerification = await prisma.emailVerification.create({
+      data: {
+        userId: newUser.id,
+        token,
+        expiredAt,
+        type: ACTION_TYPE.REGISTER,
+      },
+    });
+    await sendEmailWithTemplate({
+      to: email,
+      subject: EmailSubject.Register,
+      templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
+      dynamicTemplateData: {
+        verificationLink: generateUrlEmailVerifyRegister(accessToken),
+      },
+    });
     return {
-      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
-      data: new SendEmailRegisterMismatchError(),
+      status: HTTP_RESPONSE_CODE.CREATED,
+      data: newEmailVerification,
     };
   } catch (error) {
     const err = error as Error;
@@ -398,14 +393,6 @@ const sendEmailResetPassword = async (
 
     const user = await prisma.user.findUnique({ where: { email } });
 
-    // Case user not found
-    if (!user) {
-      return {
-        status: HTTP_RESPONSE_CODE.NOT_FOUND,
-        data: new RecordNotFoundError('User not found'),
-      };
-    }
-
     // Case user status is pending
     if (user && user.status === USER_STATUS.PENDING) {
       return {
@@ -415,8 +402,9 @@ const sendEmailResetPassword = async (
     }
 
     // Config expiredAt for email verification
-    const expiredAt = dayjs().add(1, 'd').toDate();
-    const tokenExpiresIn = Math.floor((expiredAt.getTime() - Date.now()) / 1000); // Duration in seconds
+    const currentDate = dayjs();
+    const expiredAt = currentDate.add(1, 'd').toDate();
+    const tokenExpiresIn = Math.floor((expiredAt.getTime() - currentDate.valueOf()) / 1000); // Duration in seconds
 
     // Case user registered status is activated
     if (user && user.status === USER_STATUS.ACTIVATED) {
@@ -430,7 +418,7 @@ const sendEmailResetPassword = async (
         },
       });
       const isEmailExpired =
-        emailVerification && dayjs().isAfter(dayjs(emailVerification.expiredAt));
+        emailVerification && currentDate.isAfter(dayjs(emailVerification.expiredAt));
       const isTokenCompleted = emailVerification && emailVerification.completedAt;
 
       // Case email verification not found
@@ -504,9 +492,10 @@ const sendEmailResetPassword = async (
       }
     }
 
+    // Case user not found
     return {
-      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
-      data: new SendEmailResetPasswordMismatchError(),
+      status: HTTP_RESPONSE_CODE.NOT_FOUND,
+      data: new RecordNotFoundError('User not found'),
     };
   } catch (error) {
     const err = error as Error;
