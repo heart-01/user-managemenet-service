@@ -47,6 +47,12 @@ const seed = async () => {
         content: 'Private policy',
         version: '1.0.0',
       },
+      {
+        id: '3c286a09-bcbd-460f-8c93-f39e6afca4da',
+        type: POLICY_TYPE.EMAILMARKETING,
+        content: 'Allow Invesnity to send promotional news via email.',
+        version: '1.0.0',
+      },
     ];
     const policyProcesses = policies.map((policy) =>
       prisma.policy.upsert({
