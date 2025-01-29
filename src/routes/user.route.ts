@@ -34,6 +34,25 @@ const userRouter: express.Router = express.Router();
  * @return {string} 404 - User not found - application/json
  */
 
+/**
+ * GET /user/check-username
+ * @summary Check if username is available
+ * @tags users
+ * @param {string} username.query.required - Username
+ * @return {boolean} 200 - Username is available - application/json
+ * @return {boolean} 200 - Username is not available - application/json
+ * @return {string} 500 - Internal server error - application/json
+ */
+
+userRouter.get(
+  '/check-username',
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.query,
+    schema: userValidator.checkUsername,
+  }),
+  userController.checkUsername,
+);
+
 userRouter.get(
   '/:id',
   authenticateMiddleware,

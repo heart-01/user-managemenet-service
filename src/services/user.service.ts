@@ -46,6 +46,33 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
   }
 };
 
+export const checkUsername = async (
+  username: string,
+): Promise<ResponseCommonType<boolean | Error>> => {
+  try {
+    loggerService.info('checkUsername');
+    loggerService.debug('username', username);
+
+    const result = await prisma.user.findUnique({
+      where: { username },
+      select: {
+        id: true,
+      },
+    });
+
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: !!result,
+    };
+  } catch (error) {
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: error as Error,
+    };
+  }
+};
+
 export default {
   getUserById,
+  checkUsername,
 };

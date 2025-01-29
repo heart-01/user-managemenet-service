@@ -65,4 +65,53 @@ describe('User Service (Current year: 2024)', () => {
       expect(result.data).toStrictEqual(null);
     });
   });
+
+  describe('checkUsername', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    it('should return true when username exists', async () => {
+      const username = 'existingUser';
+      const mockUser: User = {
+        id: '11111111-1111-1111-1111-111111111111',
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'existingUser',
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+      };
+      const expected = true;
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      const result = await userService.checkUsername(username);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
+    });
+
+    it('should return false when username does not exist', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      const username = 'noExistingUser';
+      const expected = false;
+      const result = await userService.checkUsername(username);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
+    });
+
+    it('should return error 500 when database connection has problem', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(null);
+
+      const username = 'existingUser';
+      const result = await userService.checkUsername(username);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+      expect(result.data).toStrictEqual(null);
+    });
+  });
 });
