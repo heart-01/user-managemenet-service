@@ -62,7 +62,7 @@ export const checkUsername = async (
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: !!result,
+      data: Boolean(result),
     };
   } catch (error) {
     return {
