@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { verify } from 'jsonwebtoken';
+import { type SignOptions, verify } from 'jsonwebtoken';
 import { EmailVerification } from '@prisma/client';
 import loggerService from './logger.service';
 import dayjs from '../config/dayjs';
@@ -11,8 +11,8 @@ import {
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
 } from '../config/dotenv';
 import { prisma, Prisma, runTransaction } from '../config/database';
-import { USER_STATUS, ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
+import { USER_STATUS, ACTION_TYPE } from '../enums/prisma.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import {
@@ -86,7 +86,7 @@ const login = async (
       const accessToken = generateToken(
         { id: user.id, name: user.name },
         JWT_SECRET,
-        ACCESS_TOKEN_EXPIRES_IN,
+        ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
 
       return {
@@ -361,7 +361,7 @@ const register = async (
     const accessToken = generateToken(
       { id: result.id, name: result.name },
       JWT_SECRET,
-      ACCESS_TOKEN_EXPIRES_IN,
+      ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
     );
 
     return {

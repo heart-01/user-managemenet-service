@@ -1,5 +1,6 @@
 import { LoginTicket, TokenPayload } from 'google-auth-library';
 import { AuthProvider } from '@prisma/client';
+import type { SignOptions } from 'jsonwebtoken';
 import loggerService from './logger.service';
 import authValidator from '../validators/auth.validator';
 import { googleClient } from '../config/googleAuth';
@@ -80,7 +81,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       const accessToken = generateToken(
         { id: user.id, name: user.name },
         JWT_SECRET,
-        ACCESS_TOKEN_EXPIRES_IN,
+        ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
@@ -143,7 +144,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       const accessToken = generateToken(
         { id: result.id, name: result.name },
         JWT_SECRET,
-        ACCESS_TOKEN_EXPIRES_IN,
+        ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
