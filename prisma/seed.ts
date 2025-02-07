@@ -1,6 +1,11 @@
 import { PrismaClient, USER_STATUS, POLICY_TYPE } from '@prisma/client';
 import loggerService from '../src/services/logger.service';
 import { hashPassword } from '../src/utils/hashing';
+import {
+  initEmailMarketingPolicyContent,
+  initPrivacyPolicyContent,
+  initTermsOfServicesPolicyContent,
+} from './policyContent';
 
 const prisma = new PrismaClient();
 
@@ -38,19 +43,19 @@ const seed = async () => {
       {
         id: '62fcc924-5674-4080-9467-6ff6893b3ef0',
         type: POLICY_TYPE.TERMOFSERVICES,
-        content: 'Termofservices policy',
+        content: initTermsOfServicesPolicyContent,
         version: '1.0.0',
       },
       {
         id: 'c27622ed-62d9-4949-be34-45106146d68e',
         type: POLICY_TYPE.PRIVATE,
-        content: 'Private policy',
+        content: initPrivacyPolicyContent,
         version: '1.0.0',
       },
       {
         id: '3c286a09-bcbd-460f-8c93-f39e6afca4da',
         type: POLICY_TYPE.EMAILMARKETING,
-        content: 'Allow Invesnity to send promotional news via email.',
+        content: initEmailMarketingPolicyContent,
         version: '1.0.0',
       },
     ];
