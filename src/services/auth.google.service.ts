@@ -14,7 +14,6 @@ import { AuthResponseType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
 import {
   AuthProviderMismatchError,
-  ConflictError,
   GoogleIdTokenMissingScopeError,
   ResponseError,
 } from '../errors';
@@ -42,30 +41,29 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     }
 
     // Get user and authProvider
-    const user: UserType | null = await prisma.user.findUnique({
+    let user = await prisma.user.findFirst({
       where: {
-        email: userPayload.email,
+        AuthProvider: {
+          some: {
+            providerUserId: userPayload.sub,
+          },
+        },
       },
-      select: {
-        id: true,
-        name: true,
-        phoneNumber: true,
-        bio: true,
-        username: true,
-        email: true,
-        imageUrl: true,
-        status: true,
-        latestLoginAt: true,
-        createdAt: true,
-        updatedAt: true,
+      include: {
+        AuthProvider: true,
       },
     });
-    const authProvider: AuthProvider | null = await prisma.authProvider.findUnique({
-      where: {
-        providerUserId: userPayload.sub,
-        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
-      },
-    });
+    if (!user) {
+      user = await prisma.user.findFirst({
+        where: {
+          email: userPayload.email,
+        },
+        include: {
+          AuthProvider: true,
+        },
+      });
+    }
+    const authProvider: AuthProvider | null = user?.AuthProvider[0] || null;
 
     // Case user used to login with google before
     if (user && authProvider) {
@@ -91,9 +89,32 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
 
     // Case when user unlinked provider the user but signIn google again
     if (user && !authProvider) {
+      await runTransaction(async (prismaTransaction) => {
+        await prismaTransaction.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            latestLoginAt: new Date(),
+          },
+        });
+        await prismaTransaction.authProvider.create({
+          data: {
+            userId: user.id,
+            authProvider: AUTH_PROVIDER_NAME.GOOGLE,
+            providerUserId: userPayload.sub,
+            providerEmail: userPayload.email,
+          },
+        });
+      });
+      const accessToken = generateToken(
+        { id: user.id, name: user.name },
+        JWT_SECRET,
+        ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
+      );
       return {
-        status: HTTP_RESPONSE_CODE.CONFLICT,
-        data: new ConflictError('User already exists'),
+        status: HTTP_RESPONSE_CODE.OK,
+        data: { user, accessToken, isFirstTimeLogin: false },
       };
     }
 
