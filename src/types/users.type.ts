@@ -1,4 +1,4 @@
-import type { User } from '@prisma/client';
+import type { AuthProvider, User } from '@prisma/client';
 
 export type GetUserParamType = {
   id: string;
@@ -9,3 +9,7 @@ export type CheckUsernameQueryType = {
 };
 
 export type UserType = Omit<User, 'password'>;
+
+export type UserAuthType = UserType & {
+  AuthProvider: [AuthProvider];
+};

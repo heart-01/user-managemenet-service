@@ -8,7 +8,7 @@ import { ACCESS_TOKEN_EXPIRES_IN, GOOGLE_CLIENT_ID, JWT_SECRET } from '../config
 import { prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, AUTH_PROVIDER_NAME } from '../enums/prisma.enum';
-import { UserType } from '../types/users.type';
+import { UserType, UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
@@ -41,7 +41,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     }
 
     // Get user and authProvider
-    let user = await prisma.user.findFirst({
+    let user = (await prisma.user.findFirst({
       where: {
         AuthProvider: {
           some: {
@@ -49,19 +49,41 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
           },
         },
       },
-      include: {
+      select: {
+        id: true,
+        name: true,
+        phoneNumber: true,
+        bio: true,
+        username: true,
+        email: true,
+        imageUrl: true,
+        status: true,
+        latestLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
         AuthProvider: true,
       },
-    });
+    })) as UserAuthType | null;
     if (!user) {
-      user = await prisma.user.findFirst({
+      user = (await prisma.user.findFirst({
         where: {
           email: userPayload.email,
         },
-        include: {
+        select: {
+          id: true,
+          name: true,
+          phoneNumber: true,
+          bio: true,
+          username: true,
+          email: true,
+          imageUrl: true,
+          status: true,
+          latestLoginAt: true,
+          createdAt: true,
+          updatedAt: true,
           AuthProvider: true,
         },
-      });
+      })) as UserAuthType | null;
     }
     const authProvider: AuthProvider | null = user?.AuthProvider[0] || null;
 
