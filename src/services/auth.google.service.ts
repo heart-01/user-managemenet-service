@@ -85,7 +85,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         },
       })) as UserAuthType | null;
     }
-    const authProvider: AuthProvider | null = user?.AuthProvider[0] || null;
+    const authProvider: AuthProvider | null = user?.AuthProvider?.[0] ?? null;
 
     // Case user used to login with google before
     if (user && authProvider) {
@@ -105,7 +105,23 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
-        data: { user, accessToken, isFirstTimeLogin: false },
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            phoneNumber: user.phoneNumber,
+            bio: user.bio,
+            username: user.username,
+            email: user.email,
+            imageUrl: user.imageUrl,
+            status: user.status,
+            latestLoginAt: user.latestLoginAt,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+          accessToken,
+          isFirstTimeLogin: false,
+        },
       };
     }
 
@@ -136,7 +152,23 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
-        data: { user, accessToken, isFirstTimeLogin: false },
+        data: {
+          user: {
+            id: user.id,
+            name: user.name,
+            phoneNumber: user.phoneNumber,
+            bio: user.bio,
+            username: user.username,
+            email: user.email,
+            imageUrl: user.imageUrl,
+            status: user.status,
+            latestLoginAt: user.latestLoginAt,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+          },
+          accessToken,
+          isFirstTimeLogin: false,
+        },
       };
     }
 

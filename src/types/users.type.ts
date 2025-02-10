@@ -11,5 +11,5 @@ export type CheckUsernameQueryType = {
 export type UserType = Omit<User, 'password'>;
 
 export type UserAuthType = UserType & {
-  AuthProvider: [AuthProvider];
+  AuthProvider?: [AuthProvider];
 };

@@ -5,7 +5,7 @@ import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
 import { AUTH_PROVIDER_NAME, POLICY_TYPE, USER_STATUS } from '../../enums/prisma.enum';
 import { authGoogleService } from '../../services/index';
 import type { AuthResponseType } from '../../types/auth.type';
-import { UserType } from '../../types/users.type';
+import { UserAuthType, UserType } from '../../types/users.type';
 import { generateToken } from '../../utils/token';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -15,7 +15,7 @@ jest.mock('../../config/googleAuth', () => ({
   },
 }));
 const prismaTransactionMock = {
-  user: { create: jest.fn() },
+  user: { create: jest.fn(), update: jest.fn() },
   authProvider: { create: jest.fn() },
   policy: { findMany: jest.fn() },
   userPolicy: { createMany: jest.fn() },
@@ -23,11 +23,8 @@ const prismaTransactionMock = {
 jest.mock('../../config/database', () => ({
   prisma: {
     user: {
-      findUnique: jest.fn(),
+      findFirst: jest.fn(),
       update: jest.fn(),
-    },
-    authProvider: {
-      findUnique: jest.fn(),
     },
     policy: {
       findMany: jest.fn(),
@@ -94,8 +91,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           email: 'test@gmail.com',
         }),
       });
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-      (prisma.authProvider.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findFirst as jest.Mock).mockResolvedValue(null);
       (prismaTransactionMock.user.create as jest.Mock).mockResolvedValue(mockUser);
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(null);
       (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
@@ -109,6 +105,29 @@ describe('Auth Google Service (Current year: 2024)', () => {
 
     it('should return user access token by google successful', async () => {
       const userId = '11111111-1111-1111-1111-111111111111';
+      const mockFindUser: UserAuthType = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        AuthProvider: [
+          {
+            id: '21111111-1111-1111-1111-111111111111',
+            userId,
+            authProvider: AUTH_PROVIDER_NAME.GOOGLE,
+            providerEmail: 'test@gmail.com',
+            providerUserId: '11111111-1111-1111-1111-111111111112',
+            linkedAt: new Date(),
+          },
+        ],
+      };
       const mockUser: UserType = {
         id: userId,
         name: 'test',
@@ -121,14 +140,6 @@ describe('Auth Google Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
-      };
-      const mockAuthProvider: AuthProvider = {
-        id: '21111111-1111-1111-1111-111111111111',
-        userId,
-        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
-        providerEmail: 'test@gmail.com',
-        providerUserId: '11111111-1111-1111-1111-111111111112',
-        linkedAt: new Date(),
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -155,8 +166,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           email: 'test@gmail.com',
         }),
       });
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.authProvider.findUnique as jest.Mock).mockResolvedValue(mockAuthProvider);
+      (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockFindUser);
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
@@ -165,13 +175,13 @@ describe('Auth Google Service (Current year: 2024)', () => {
       expect(result.data).toStrictEqual(expected);
     });
 
-    it('should return error 409 when user already unlink provider(google) but signin by provider(google)', async () => {
+    it('should return user when user unlinked provider the user but signIn google again', async () => {
       const userId = '11111111-1111-1111-1111-111111111111';
-      const mockUser: UserType = {
+      const mockUser = {
         id: userId,
         name: 'test',
         bio: null,
-        email: 'test@test.com',
+        email: 'test@gmail.com',
         imageUrl: null,
         phoneNumber: null,
         status: USER_STATUS.ACTIVATED,
@@ -179,6 +189,31 @@ describe('Auth Google Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+      };
+      const mockAuthProvider: AuthProvider = {
+        id: '21111111-1111-1111-1111-111111111111',
+        userId,
+        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
+        providerEmail: 'test@gmail.com',
+        providerUserId: userId,
+        linkedAt: new Date(),
+      };
+      const expected: AuthResponseType = {
+        accessToken: 'accessToken',
+        isFirstTimeLogin: false,
+        user: {
+          id: userId,
+          name: 'test',
+          bio: null,
+          email: 'test@gmail.com',
+          imageUrl: null,
+          phoneNumber: null,
+          status: USER_STATUS.ACTIVATED,
+          username: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          latestLoginAt: new Date(),
+        },
       };
 
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
@@ -188,11 +223,14 @@ describe('Auth Google Service (Current year: 2024)', () => {
           email: 'test@gmail.com',
         }),
       });
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
-      (prisma.authProvider.findUnique as jest.Mock).mockResolvedValue(null);
+      (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
+      (prismaTransactionMock.user.update as jest.Mock).mockResolvedValue(mockUser);
+      (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
+      (generateToken as jest.Mock).mockReturnValue('accessToken');
 
       const result = await authGoogleService.login('token');
-      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
     });
 
     it('should return error 401 when system get payload from provider(google) is incorrect', async () => {
@@ -208,30 +246,6 @@ describe('Auth Google Service (Current year: 2024)', () => {
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
-    it('should return error 401 when', async () => {
-      const userId = '11111111-1111-1111-1111-111111111111';
-      const mockAuthProvider: AuthProvider = {
-        id: '21111111-1111-1111-1111-111111111111',
-        userId,
-        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
-        providerEmail: 'test@gmail.com',
-        providerUserId: '11111111-1111-1111-1111-111111111112',
-        linkedAt: new Date(),
-      };
-      (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
-        getPayload: () => ({
-          sub: 'test',
-          name: 'test',
-          email: 'test@test.com',
-        }),
-      });
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
-      (prisma.authProvider.findUnique as jest.Mock).mockResolvedValue(mockAuthProvider);
-
-      const result = await authGoogleService.login('token');
-      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
-    });
-
     it('should return error 500 when database connection has problem', async () => {
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
         getPayload: () => ({
@@ -240,7 +254,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           email: 'test@gmail.com',
         }),
       });
-      (prisma.user.findUnique as jest.Mock).mockRejectedValue({ message: 'error' });
+      (prisma.user.findFirst as jest.Mock).mockRejectedValue({ message: 'error' });
 
       const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
