@@ -5,13 +5,13 @@ CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED');
 CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
 
 -- CreateEnum
-CREATE TYPE "ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD');
+CREATE TYPE "EMAIL_VERIFICATION_ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD');
 
 -- CreateEnum
 CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES', 'EMAILMARKETING');
 
 -- CreateEnum
-CREATE TYPE "LOGIN_STATUS" AS ENUM ('SUCCESS', 'FAILED');
+CREATE TYPE "USER_ACTIVITY_LOG_ACTION_TYPE" AS ENUM ('LOGIN');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -47,7 +47,7 @@ CREATE TABLE "auth_providers" (
 CREATE TABLE "email_verifications" (
     "token" UUID NOT NULL,
     "user_id" UUID NOT NULL,
-    "type" "ACTION_TYPE" NOT NULL,
+    "type" "EMAIL_VERIFICATION_ACTION_TYPE" NOT NULL,
     "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "expired_at" TIMESTAMP(3) NOT NULL,
     "completed_at" TIMESTAMP(3),
@@ -78,18 +78,19 @@ CREATE TABLE "user_policies" (
 );
 
 -- CreateTable
-CREATE TABLE "user_login_histories" (
+CREATE TABLE "user_activity_log" (
     "id" UUID NOT NULL,
     "email" VARCHAR(50) NOT NULL,
     "login_time" TIMESTAMP(3) NOT NULL,
-    "ip_address" VARCHAR(50) NOT NULL,
+    "ip_address" VARCHAR(50),
     "location" VARCHAR(50),
     "user_agent" VARCHAR(50),
-    "status" "LOGIN_STATUS" NOT NULL,
+    "status" INTEGER NOT NULL,
+    "action" "USER_ACTIVITY_LOG_ACTION_TYPE" NOT NULL,
     "failure_reason" VARCHAR(255),
     "created_at" TIMESTAMP(3) NOT NULL,
 
-    CONSTRAINT "user_login_histories_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "user_activity_log_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

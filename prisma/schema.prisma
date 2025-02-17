@@ -27,7 +27,7 @@ enum AUTH_PROVIDER_NAME {
   EMAIL
 }
 
-enum ACTION_TYPE {
+enum EMAIL_VERIFICATION_ACTION_TYPE {
   REGISTER
   RESETPASSWORD
 }
@@ -38,9 +38,8 @@ enum POLICY_TYPE {
   EMAILMARKETING
 }
 
-enum LOGIN_STATUS {
-  SUCCESS
-  FAILED
+enum USER_ACTIVITY_LOG_ACTION_TYPE {
+  LOGIN
 }
 
 model User {
@@ -77,12 +76,12 @@ model AuthProvider {
 }
 
 model EmailVerification {
-  token       String      @id @map("token") @db.Uuid
-  userId      String      @map("user_id") @db.Uuid
-  type        ACTION_TYPE @map("type")
-  createdAt   DateTime    @default(now()) @map("created_at") @db.Timestamptz(3)
-  expiredAt   DateTime    @map("expired_at") @db.Timestamp(3)
-  completedAt DateTime?   @map("completed_at") @db.Timestamp(3)
+  token       String                         @id @map("token") @db.Uuid
+  userId      String                         @map("user_id") @db.Uuid
+  type        EMAIL_VERIFICATION_ACTION_TYPE @map("type")
+  createdAt   DateTime                       @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiredAt   DateTime                       @map("expired_at") @db.Timestamp(3)
+  completedAt DateTime?                      @map("completed_at") @db.Timestamp(3)
 
   user User @relation(fields: [userId], references: [id])
 
@@ -113,16 +112,17 @@ model UserPolicy {
   @@map("user_policies")
 }
 
-model UserLoginHistory {
-  id            String       @id @default(uuid()) @db.Uuid
-  email         String       @map("email") @db.VarChar(50)
-  loginTime     DateTime     @map("login_time") @db.Timestamp(3)
-  ipAddress     String       @map("ip_address") @db.VarChar(50)
-  location      String?      @map("location") @db.VarChar(50)
-  userAgent     String?      @map("user_agent") @db.VarChar(50)
-  status        LOGIN_STATUS @map("status")
-  failureReason String?      @map("failure_reason") @db.VarChar(255)
-  createdAt     DateTime     @map("created_at") @db.Timestamp(3)
+model UserActivityLog {
+  id            String                        @id @default(uuid()) @db.Uuid
+  email         String                        @map("email") @db.VarChar(50)
+  loginTime     DateTime                      @map("login_time") @db.Timestamp(3)
+  ipAddress     String?                       @map("ip_address") @db.VarChar(50)
+  location      String?                       @map("location") @db.VarChar(50)
+  userAgent     String?                       @map("user_agent") @db.VarChar(50)
+  status        Int                           @map("status")
+  action        USER_ACTIVITY_LOG_ACTION_TYPE @map("action")
+  failureReason String?                       @map("failure_reason") @db.VarChar(255)
+  createdAt     DateTime                      @map("created_at") @db.Timestamp(3)
 
-  @@map("user_login_histories")
+  @@map("user_activity_log")
 }
