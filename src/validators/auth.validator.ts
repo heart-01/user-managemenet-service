@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { ACTION_TYPE } from '../enums/prisma.enum';
+import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 
 const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
@@ -20,7 +20,7 @@ const sendEmailRegister: Joi.ObjectSchema = Joi.object().keys({
 
 const verifyEmail: Joi.ObjectSchema = Joi.object().keys({
   token: Joi.string().required(),
-  type: Joi.string().valid(...Object.values(ACTION_TYPE)),
+  type: Joi.string().valid(...Object.values(EMAIL_VERIFICATION_ACTION_TYPE)),
 });
 
 const userPayloadSchema = Joi.object({
