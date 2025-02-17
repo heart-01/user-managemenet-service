@@ -30,6 +30,16 @@ export class ConflictError extends Error {
   }
 }
 
+export class ForbiddenError extends Error {
+  constructor(message: string | null) {
+    super(message || 'Forbidden');
+  }
+
+  toJSON() {
+    return this.message;
+  }
+}
+
 export class InvalidDataError extends Error {
   constructor(message: string | null) {
     super(message || 'Invalid data');
