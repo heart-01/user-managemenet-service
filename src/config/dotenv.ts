@@ -20,6 +20,9 @@ export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 export const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 export const TIMEZONE = process.env.TIMEZONE || 'Asia/Bangkok';
 
+export const IPINFO_API_KEY = process.env.IPINFO_API_KEY || '';
+export const USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT = process.env.USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT || 5;
+
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 
@@ -35,3 +38,5 @@ export const SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL =
   process.env.SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL || '';
 export const SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL =
   process.env.SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL || '';
+export const SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL =
+  process.env.SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL || '';
