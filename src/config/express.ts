@@ -2,6 +2,7 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import expressJSDocSwagger from 'express-jsdoc-swagger';
+import requestIp from 'request-ip';
 
 import { PORT } from './dotenv';
 import corsOptions from './cors';
@@ -16,6 +17,7 @@ export default () => {
   app.use(limiter);
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.use(requestIp.mw());
   app.use(express.static('public'));
   expressJSDocSwagger(app)(swaggerOptions);
 
