@@ -2,17 +2,19 @@ import { v4 as uuidv4 } from 'uuid';
 import { type SignOptions, verify } from 'jsonwebtoken';
 import { EmailVerification } from '@prisma/client';
 import loggerService from './logger.service';
+import userActivityLogService from './userActivityLog.service';
 import dayjs from '../config/dayjs';
 import {
   ACCESS_TOKEN_EXPIRES_IN,
   JWT_SECRET,
   SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
+  SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
 } from '../config/dotenv';
 import { prisma, Prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
-import { USER_STATUS, ACTION_TYPE } from '../enums/prisma.enum';
+import { USER_STATUS, EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 import { UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import {
@@ -20,7 +22,13 @@ import {
   generateUrlEmailVerifyResetPassword,
   sendEmailWithTemplate,
 } from '../utils/email';
-import { ConflictError, InvalidDataError, RecordNotFoundError, ResponseError } from '../errors';
+import {
+  ConflictError,
+  ForbiddenError,
+  InvalidDataError,
+  RecordNotFoundError,
+  ResponseError,
+} from '../errors';
 import { generateToken } from '../utils/token';
 import { hashPassword, verifyPassword } from '../utils/hashing';
 import {
@@ -37,11 +45,22 @@ import { EmailSubject } from '../enums/email.enum';
 const login = async (
   email: string,
   password: string,
+  device: string | undefined,
 ): Promise<ResponseCommonType<AuthResponseType | Error>> => {
   try {
     loggerService.info('localLogin');
     loggerService.debug('email', email);
     loggerService.debug('password', password);
+    loggerService.debug('device', device);
+
+    // Check recent login attempts
+    const recentAttempts = await userActivityLogService.checkRecentLoginAttempts(email);
+    if (recentAttempts.status !== HTTP_RESPONSE_CODE.OK) {
+      return {
+        status: HTTP_RESPONSE_CODE.FORBIDDEN,
+        data: new ForbiddenError('Too many login attempts. Please try again later.'),
+      };
+    }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
@@ -83,6 +102,14 @@ const login = async (
         },
       });
 
+      // Send email login device
+      await sendEmailWithTemplate({
+        to: email,
+        subject: EmailSubject.LoginDevice,
+        templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
+        dynamicTemplateData: { device },
+      });
+
       const accessToken = generateToken(
         { id: user.id, name: user.name },
         JWT_SECRET,
@@ -113,7 +140,7 @@ const login = async (
 
     // Case user login is mismatch
     return {
-      status: HTTP_RESPONSE_CODE.NOT_FOUND,
+      status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
       data: new RecordNotFoundError('Invalid email or password. Please try again.'),
     };
   } catch (error) {
@@ -152,7 +179,7 @@ const sendEmailRegister = async (
       const emailVerification = await prisma.emailVerification.findFirst({
         where: {
           userId: user.id,
-          type: ACTION_TYPE.REGISTER,
+          type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         },
         orderBy: {
           createdAt: 'desc',
@@ -172,7 +199,7 @@ const sendEmailRegister = async (
             userId: emailVerification.userId,
             token,
             expiredAt,
-            type: ACTION_TYPE.REGISTER,
+            type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
           },
         });
         await sendEmailWithTemplate({
@@ -223,7 +250,7 @@ const sendEmailRegister = async (
         userId: newUser.id,
         token,
         expiredAt,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
       },
     });
     await sendEmailWithTemplate({
@@ -249,7 +276,7 @@ const sendEmailRegister = async (
 
 const verifyEmail = async (
   token: string,
-  type: ACTION_TYPE,
+  type: EMAIL_VERIFICATION_ACTION_TYPE,
 ): Promise<ResponseCommonType<VerifyEmailResponseType | Error>> => {
   try {
     loggerService.info('verifyEmail');
@@ -391,6 +418,15 @@ const sendEmailResetPassword = async (
     loggerService.info('sendEmailResetPassword');
     loggerService.debug('email', email);
 
+    // Check recent login attempts
+    const recentAttempts = await userActivityLogService.checkRecentLoginAttempts(email);
+    if (recentAttempts.status !== HTTP_RESPONSE_CODE.OK) {
+      return {
+        status: HTTP_RESPONSE_CODE.FORBIDDEN,
+        data: new ForbiddenError('Too many login attempts. Please try again later.'),
+      };
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     // Case user status is pending
@@ -411,7 +447,7 @@ const sendEmailResetPassword = async (
       const emailVerification = await prisma.emailVerification.findFirst({
         where: {
           userId: user.id,
-          type: ACTION_TYPE.RESETPASSWORD,
+          type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         },
         orderBy: {
           createdAt: 'desc',
@@ -427,7 +463,12 @@ const sendEmailResetPassword = async (
         const payload: PayloadTokenResetPasswordType = { id: user.id, token };
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         const newEmailVerification = await prisma.emailVerification.create({
-          data: { userId: user.id, token, expiredAt, type: ACTION_TYPE.RESETPASSWORD },
+          data: {
+            userId: user.id,
+            token,
+            expiredAt,
+            type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
+          },
         });
         await sendEmailWithTemplate({
           to: email,
@@ -453,7 +494,7 @@ const sendEmailResetPassword = async (
             userId: emailVerification.userId,
             token,
             expiredAt,
-            type: ACTION_TYPE.RESETPASSWORD,
+            type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
           },
         });
         await sendEmailWithTemplate({

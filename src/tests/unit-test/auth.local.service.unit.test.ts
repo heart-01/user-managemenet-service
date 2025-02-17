@@ -1,10 +1,14 @@
 import { verify } from 'jsonwebtoken';
-import type { EmailVerification, User } from '@prisma/client';
+import type { EmailVerification, User, UserActivityLog } from '@prisma/client';
 import { prisma, Prisma } from '../../config/database';
 import * as database from '../../config/database';
-import { authLocalService } from '../../services/index';
+import { authLocalService, userActivityLogService } from '../../services/index';
 import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
-import { ACTION_TYPE, USER_STATUS } from '../../enums/prisma.enum';
+import {
+  EMAIL_VERIFICATION_ACTION_TYPE,
+  USER_ACTIVITY_LOG_ACTION_TYPE,
+  USER_STATUS,
+} from '../../enums/prisma.enum';
 import { generateToken } from '../../utils/token';
 import { hashPassword, verifyPassword } from '../../utils/hashing';
 import { generateUrlEmailVerifyRegister, sendEmailWithTemplate } from '../../utils/email';
@@ -73,21 +77,101 @@ describe('Auth Local Service (Current year: 2024)', () => {
         },
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       (verifyPassword as jest.Mock).mockResolvedValue(true);
       jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUser);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authLocalService.login('test@test.com', '1234');
+      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
 
-    it('should return error 404 when no user in database', async () => {
+    it('should return error 401 when no user in database', async () => {
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const result = await authLocalService.login('test2@test.com', '1234');
-      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
+      const result = await authLocalService.login('test2@test.com', '1234', 'Chrome browser');
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
+    });
+
+    it('should return error 403 when user enters an incorrect password more than 5 times.', async () => {
+      const mockUserActivityLog: UserActivityLog[] = [
+        {
+          id: 'c1803285-9289-428d-aa28-f671eef514b9',
+          email: 'john@email.com',
+          loginTime: new Date('2025-02-17T05:09:42.897Z'),
+          ipAddress: '::ffff:127.0.0.1',
+          location: 'Nakhon Pathom',
+          userAgent: 'insomnia/2023.5.8',
+          status: 401,
+          action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
+          failureReason: 'Error: Invalid email or password. Please try again.',
+          createdAt: new Date('2025-02-17T05:09:42.897Z'),
+        },
+        {
+          id: '161bc427-2543-4915-acab-82f4b1384741',
+          email: 'john@email.com',
+          loginTime: new Date('2025-02-17T05:09:42.897Z'),
+          ipAddress: '::ffff:127.0.0.1',
+          location: 'Nakhon Pathom',
+          userAgent: 'insomnia/2023.5.8',
+          status: 401,
+          action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
+          failureReason: 'Error: Invalid email or password. Please try again.',
+          createdAt: new Date('2025-02-17T05:09:42.897Z'),
+        },
+        {
+          id: '5dd69ad4-9a9e-40aa-9da1-2fa993f8859a',
+          email: 'john@email.com',
+          loginTime: new Date('2025-02-17T05:09:42.897Z'),
+          ipAddress: '::ffff:127.0.0.1',
+          location: 'Nakhon Pathom',
+          userAgent: 'insomnia/2023.5.8',
+          status: 401,
+          action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
+          failureReason: 'Error: Invalid email or password. Please try again.',
+          createdAt: new Date('2025-02-17T05:09:42.897Z'),
+        },
+        {
+          id: '92b343d5-0f80-4129-8c45-2e9f84123b15',
+          email: 'john@email.com',
+          loginTime: new Date('2025-02-17T05:09:42.897Z'),
+          ipAddress: '::ffff:127.0.0.1',
+          location: 'Nakhon Pathom',
+          userAgent: 'insomnia/2023.5.8',
+          status: 401,
+          action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
+          failureReason: 'Error: Invalid email or password. Please try again.',
+          createdAt: new Date('2025-02-17T05:09:42.897Z'),
+        },
+        {
+          id: 'ef2ee7e8-9c2f-43bd-b709-a350b6a0cb26',
+          email: 'john@email.com',
+          loginTime: new Date('2025-02-17T05:09:42.897Z'),
+          ipAddress: '::ffff:127.0.0.1',
+          location: 'Nakhon Pathom',
+          userAgent: 'insomnia/2023.5.8',
+          status: 401,
+          action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
+          failureReason: 'Error: Invalid email or password. Please try again.',
+          createdAt: new Date('2025-02-17T05:09:42.897Z'),
+        },
+      ];
+
+      jest.spyOn(userActivityLogService, 'checkRecentLoginAttempts').mockResolvedValue({
+        status: HTTP_RESPONSE_CODE.FORBIDDEN,
+        data: mockUserActivityLog,
+      });
+
+      const result = await authLocalService.login('john@email.com', '1234', 'Chrome browser');
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.FORBIDDEN);
     });
 
     it('should return error 409 when user status is pending', async () => {
@@ -107,9 +191,12 @@ describe('Auth Local Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
-      const result = await authLocalService.login('test@test.com', '1234');
+      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
     });
 
@@ -130,9 +217,12 @@ describe('Auth Local Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
-      const result = await authLocalService.login('test@test.com', '1234');
+      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -153,17 +243,23 @@ describe('Auth Local Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       (verifyPassword as jest.Mock).mockResolvedValue(false);
 
-      const result = await authLocalService.login('test@test.com', '12345');
+      const result = await authLocalService.login('test@test.com', '12345', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
     it('should return error 500 when database connection has problem', async () => {
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue({ message: 'error' });
 
-      const result = await authLocalService.login('test@test.com', '1234');
+      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });
@@ -190,7 +286,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -198,7 +294,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockNewEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
@@ -206,7 +302,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
@@ -243,7 +339,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: new Date(),
@@ -252,7 +348,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
 
       const mockNewEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: new Date(),
@@ -260,7 +356,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: new Date(),
@@ -297,7 +393,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -305,7 +401,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -341,7 +437,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -349,7 +445,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -411,7 +507,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -426,7 +522,10 @@ describe('Auth Local Service (Current year: 2024)', () => {
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(mockEmailVerification);
       jest.spyOn(prisma.emailVerification, 'update').mockResolvedValue(mockEmailVerification);
 
-      const result = await authLocalService.verifyEmail('token', ACTION_TYPE.REGISTER);
+      const result = await authLocalService.verifyEmail(
+        'token',
+        EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
+      );
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CREATED);
       expect(result.data).toStrictEqual(expected);
     });
@@ -441,7 +540,10 @@ describe('Auth Local Service (Current year: 2024)', () => {
       (verify as jest.Mock).mockReturnValue(mockPayloadTokenVerifyEmail);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(null);
 
-      const result = await authLocalService.verifyEmail('token', ACTION_TYPE.REGISTER);
+      const result = await authLocalService.verifyEmail(
+        'token',
+        EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
+      );
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -453,7 +555,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.REGISTER,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -463,7 +565,10 @@ describe('Auth Local Service (Current year: 2024)', () => {
       (verify as jest.Mock).mockReturnValue(mockPayloadTokenVerifyEmail);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(mockEmailVerification);
 
-      const result = await authLocalService.verifyEmail('token', ACTION_TYPE.REGISTER);
+      const result = await authLocalService.verifyEmail(
+        'token',
+        EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
+      );
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -477,7 +582,10 @@ describe('Auth Local Service (Current year: 2024)', () => {
       (verify as jest.Mock).mockReturnValue(mockPayloadTokenVerifyEmail);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockRejectedValue({ message: 'error' });
 
-      const result = await authLocalService.verifyEmail('token', ACTION_TYPE.REGISTER);
+      const result = await authLocalService.verifyEmail(
+        'token',
+        EMAIL_VERIFICATION_ACTION_TYPE.REGISTER,
+      );
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });
@@ -655,7 +763,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -663,7 +771,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockNewEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
@@ -671,13 +779,16 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
         expiredAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(mockEmailVerification);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
@@ -708,7 +819,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token',
         createdAt: new Date(),
         completedAt: new Date(),
@@ -716,7 +827,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockNewEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
@@ -724,13 +835,16 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
         expiredAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(mockEmailVerification);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
@@ -761,7 +875,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockNewEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
@@ -769,13 +883,16 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token-2',
         createdAt: new Date(),
         completedAt: null,
         expiredAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
@@ -806,7 +923,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const mockEmailVerification: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
@@ -814,13 +931,16 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
       const expected: EmailVerification = {
         userId,
-        type: ACTION_TYPE.RESETPASSWORD,
+        type: EMAIL_VERIFICATION_ACTION_TYPE.RESETPASSWORD,
         token: 'token',
         createdAt: new Date(),
         completedAt: null,
         expiredAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       jest.spyOn(prisma.emailVerification, 'findFirst').mockResolvedValue(mockEmailVerification);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
@@ -849,6 +969,9 @@ describe('Auth Local Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
       };
 
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
       const result = await authLocalService.sendEmailResetPassword('test@test.com');
@@ -856,6 +979,9 @@ describe('Auth Local Service (Current year: 2024)', () => {
     });
 
     it('should return error 404 when no user in database', async () => {
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       const result = await authLocalService.sendEmailResetPassword('test@test.com');
@@ -863,6 +989,9 @@ describe('Auth Local Service (Current year: 2024)', () => {
     });
 
     it('should return error 500 when database connection has problem', async () => {
+      jest
+        .spyOn(userActivityLogService, 'checkRecentLoginAttempts')
+        .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue({ message: 'error' });
 
       const result = await authLocalService.sendEmailResetPassword('test@test.com');

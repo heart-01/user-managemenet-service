@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { UserType } from './users.type';
-import { ACTION_TYPE } from '../enums/prisma.enum';
+import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 
 export type AuthRequest = Request & {
   user?: UserType;
@@ -27,7 +27,7 @@ export type AuthResponseType = {
 
 export type VerifyEmailType = {
   token: string;
-  type: ACTION_TYPE;
+  type: EMAIL_VERIFICATION_ACTION_TYPE;
 };
 
 export type VerifyEmailResponseType = {
