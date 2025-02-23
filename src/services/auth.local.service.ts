@@ -423,7 +423,7 @@ const sendEmailResetPassword = async (
     if (recentAttempts.status !== HTTP_RESPONSE_CODE.OK) {
       return {
         status: HTTP_RESPONSE_CODE.FORBIDDEN,
-        data: new ForbiddenError('Too many login attempts. Please try again later.'),
+        data: new ForbiddenError(`Too many login attempts. Please try again later ${recentAttempts.data}`),
       };
     }
 

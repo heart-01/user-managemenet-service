@@ -68,16 +68,16 @@ const createUserActivityLog = async (
 
 const checkRecentLoginAttempts = async (
   email: string,
-): Promise<ResponseCommonType<UserActivityLog[] | Error>> => {
+): Promise<ResponseCommonType<UserActivityLog[] | number | Error>> => {
   try {
     loggerService.info('checkRecentLoginAttempts');
-
-    const fifteenMinutesAgo = dayjs().subtract(15, 'minute').toDate();
+    const timeLimit = 15; // 15 minutes
+    const timeLimitMinutesAgo = dayjs().subtract(timeLimit, 'minute').toDate();
     const userActivityLog: UserActivityLog[] | null = await prisma.userActivityLog.findMany({
       where: {
         email,
         action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
-        createdAt: { gte: fifteenMinutesAgo },
+        createdAt: { gte: timeLimitMinutesAgo },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -98,9 +98,12 @@ const checkRecentLoginAttempts = async (
 
     // Check if the number of consecutive failed login attempts exceeds the limit
     if (consecutiveFailed.length === USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT) {
+      const lastFailedTime = consecutiveFailed[0].createdAt;
+      const lockExpiresAt = dayjs(lastFailedTime).add(timeLimit, 'minute');
+      const timeLeft = lockExpiresAt.diff(dayjs(), 'second');
       return {
         status: HTTP_RESPONSE_CODE.FORBIDDEN,
-        data: consecutiveFailed,
+        data: timeLeft,
       };
     }
 
