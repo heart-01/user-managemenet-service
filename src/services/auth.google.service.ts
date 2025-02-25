@@ -10,7 +10,7 @@ import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, AUTH_PROVIDER_NAME } from '../enums/prisma.enum';
 import { UserType, UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
-import { AuthResponseType } from '../types/auth.type';
+import { AuthResponseType, PayloadAccessTokenType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
 import {
   AuthProviderMismatchError,
@@ -99,7 +99,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         },
       });
       const accessToken = generateToken(
-        { id: user.id, name: user.name },
+        { id: user.id, name: user.name } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -146,7 +146,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         });
       });
       const accessToken = generateToken(
-        { id: user.id, name: user.name },
+        { id: user.id, name: user.name } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -217,7 +217,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         return newUser;
       });
       const accessToken = generateToken(
-        { id: result.id, name: result.name },
+        { id: result.id, name: result.name } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );

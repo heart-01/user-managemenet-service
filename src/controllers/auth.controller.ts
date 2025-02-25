@@ -9,10 +9,19 @@ import {
   SendEmailResetPasswordType,
   ResetPasswordType,
   LocalAuthType,
+  AuthValidateType,
 } from '../types/auth.type';
 import { authGoogleService, authLocalService, userActivityLogService } from '../services';
 import { USER_ACTIVITY_LOG_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
+
+export const authValidate = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { token }: AuthValidateType = request.body;
+  const result = await authLocalService.authValidate(token);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
 
 export const googleAuth = async (request: Request, response: Response) => {
   logger.start(request);
@@ -97,6 +106,7 @@ export const resetPassword = async (request: Request, response: Response) => {
 };
 
 export default {
+  authValidate,
   googleAuth,
   localAuth,
   sendEmailRegister,

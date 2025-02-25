@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { UserActivityLog } from '@prisma/client';
 import { prisma } from '../config/database';
 import dayjs from '../config/dayjs';
+import { ipinfoAxios } from '../config/axios';
 import { IPINFO_API_KEY, USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT } from '../config/dotenv';
 import loggerService from './logger.service';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
@@ -12,8 +12,7 @@ import { IPInfoType, UserActivityLogType } from '../types/userActivityLog';
 const getIPInfo = async (ipAddress: string): Promise<ResponseCommonType<IPInfoType | Error>> => {
   try {
     loggerService.info('getIPInfo');
-    const url = `https://ipinfo.io/${ipAddress}?token=${IPINFO_API_KEY}`;
-    const result = await axios.get<IPInfoType>(url);
+    const result = await ipinfoAxios.get<IPInfoType>(`/${ipAddress}?token=${IPINFO_API_KEY}`);
     return {
       status: HTTP_RESPONSE_CODE.OK,
       data: result.data,

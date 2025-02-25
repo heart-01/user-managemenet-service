@@ -41,6 +41,20 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
+ * @typedef {object} AuthValidateRequest
+ * @property {string} token.required - JWT Token
+ */
+
+/**
+ * POST /auth/validate
+ * @summary Auth Validate JWT Token
+ * @tags auth
+ * @param {AuthValidateRequest} request.body.required - JWT Token
+ * @return {AuthSuccessResponse} 200 - Success response - application/json
+ * @return {string} 401 - Unauthorized - application/json
+ */
+
+/**
  * @typedef {object} GoogleAuthRequest
  * @property {string} idToken.required - Google Auth idToken
  */
@@ -52,7 +66,6 @@ const authRouter: express.Router = express.Router();
  * @param {GoogleAuthRequest} request.body.required - Google Auth idToken
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
- * @return {string} 409 - Conflict Error - application/json
  */
 
 /**
@@ -82,6 +95,7 @@ const authRouter: express.Router = express.Router();
  * @tags auth
  * @param {SendEmailRegisterRequest} request.body.required - User's email address
  * @return {EmailVerificationResponse} 201 - Success response - application/json
+ * @return {string} 409 - Conflict Error - application/json
  * @return {string} 500 - Internal Error - application/json
  */
 
@@ -131,6 +145,7 @@ const authRouter: express.Router = express.Router();
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 404 - User not found - application/json
  * @return {string} 400 - Bad request - application/json
+ * @return {string} 409 - Conflict Error - application/json
  * @return {string} 401 - Unauthorized - application/json
  * @return {string} 403 - Forbidden - application/json
  * @return {string} 500 - Internal server error - application/json
@@ -147,6 +162,7 @@ const authRouter: express.Router = express.Router();
  * @tags auth
  * @param {SendEmailResetPasswordRequest} request.body.required - User's email address
  * @return {EmailVerificationResponse} 201 - Success response - application/json
+ * @return {string} 409 - Conflict Error - application/json
  * @return {string} 500 - Internal Error - application/json
  */
 
@@ -174,10 +190,19 @@ const authRouter: express.Router = express.Router();
  */
 
 authRouter.post(
+  '/validate',
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.authValidate,
+  }),
+  authController.authValidate,
+);
+
+authRouter.post(
   '/google/login',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.googleAuth,
+    schema: authValidator.localAuth,
   }),
   authController.googleAuth,
 );

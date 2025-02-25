@@ -1,6 +1,10 @@
 import Joi from 'joi';
 import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 
+const authValidate: Joi.ObjectSchema = Joi.object().keys({
+  token: Joi.string().required(),
+});
+
 const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
 });
@@ -71,6 +75,7 @@ const resetPassword: Joi.ObjectSchema = Joi.object().keys({
 });
 
 export default {
+  authValidate,
   googleAuth,
   localAuth,
   sendEmailRegister,

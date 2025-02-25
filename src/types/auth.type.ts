@@ -11,6 +11,10 @@ export type LocalAuthType = {
   password: string;
 };
 
+export type AuthValidateType = {
+  token: string;
+};
+
 export type GoogleAuthType = {
   idToken: string;
 };
@@ -35,9 +39,18 @@ export type VerifyEmailResponseType = {
   userId: string;
 };
 
+export type PayloadAccessTokenType = {
+  id: string;
+  name: string;
+};
+
 export type PayloadTokenVerifyEmailType = {
   id: string;
   token: string;
+};
+
+export type AuthValidateResponseType = {
+  user: PayloadAccessTokenType;
 };
 
 export type RegisterType = {
@@ -51,11 +64,6 @@ export type RegisterType = {
 
 export type SendEmailResetPasswordType = {
   email: string;
-};
-
-export type PayloadTokenResetPasswordType = {
-  id: string;
-  token: string;
 };
 
 export type ResetPasswordType = {

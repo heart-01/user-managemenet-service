@@ -33,7 +33,8 @@ import { generateToken } from '../utils/token';
 import { hashPassword, verifyPassword } from '../utils/hashing';
 import {
   AuthResponseType,
-  PayloadTokenResetPasswordType,
+  AuthValidateResponseType,
+  PayloadAccessTokenType,
   PayloadTokenVerifyEmailType,
   RegisterType,
   ResetPasswordResponseType,
@@ -41,6 +42,30 @@ import {
   VerifyEmailResponseType,
 } from '../types/auth.type';
 import { EmailSubject } from '../enums/email.enum';
+
+const authValidate = async (
+  token: string,
+): Promise<ResponseCommonType<AuthValidateResponseType | Error>> => {
+  try {
+    loggerService.info('authValidate');
+    loggerService.debug('token', token);
+
+    const decoded = verify(token, JWT_SECRET) as PayloadAccessTokenType;
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: {
+        user: decoded,
+      },
+    };
+  } catch (error) {
+    loggerService.error(error as Error);
+    const err = error as Error;
+    return {
+      status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
+      data: new ResponseError(err.message),
+    };
+  }
+};
 
 const login = async (
   email: string,
@@ -111,7 +136,7 @@ const login = async (
       });
 
       const accessToken = generateToken(
-        { id: user.id, name: user.name },
+        { id: user.id, name: user.name } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -386,7 +411,7 @@ const register = async (
     });
 
     const accessToken = generateToken(
-      { id: result.id, name: result.name },
+      { id: result.id, name: result.name } as PayloadAccessTokenType,
       JWT_SECRET,
       ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
     );
@@ -423,7 +448,9 @@ const sendEmailResetPassword = async (
     if (recentAttempts.status !== HTTP_RESPONSE_CODE.OK) {
       return {
         status: HTTP_RESPONSE_CODE.FORBIDDEN,
-        data: new ForbiddenError(`Too many login attempts. Please try again later ${recentAttempts.data}`),
+        data: new ForbiddenError(
+          `Too many login attempts. Please try again later ${recentAttempts.data}`,
+        ),
       };
     }
 
@@ -460,7 +487,7 @@ const sendEmailResetPassword = async (
       // Case email verification not found
       if (!emailVerification) {
         const token = uuidv4();
-        const payload: PayloadTokenResetPasswordType = { id: user.id, token };
+        const payload: PayloadTokenVerifyEmailType = { id: user.id, token };
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         const newEmailVerification = await prisma.emailVerification.create({
           data: {
@@ -487,7 +514,7 @@ const sendEmailResetPassword = async (
       // Case email verification is expired or token is completed
       if (isEmailExpired || isTokenCompleted) {
         const token = uuidv4();
-        const payload: PayloadTokenResetPasswordType = { id: emailVerification.userId, token };
+        const payload: PayloadTokenVerifyEmailType = { id: emailVerification.userId, token };
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         const newEmailVerification = await prisma.emailVerification.create({
           data: {
@@ -513,7 +540,7 @@ const sendEmailResetPassword = async (
 
       // Resend email verification
       if (!isTokenCompleted && !isEmailExpired && emailVerification) {
-        const payload: PayloadTokenResetPasswordType = {
+        const payload: PayloadTokenVerifyEmailType = {
           id: emailVerification.userId,
           token: emailVerification.token,
         };
@@ -612,6 +639,7 @@ const resetPassword = async (
 };
 
 export default {
+  authValidate,
   login,
   sendEmailRegister,
   verifyEmail,

@@ -14,12 +14,15 @@ import { hashPassword, verifyPassword } from '../../utils/hashing';
 import { generateUrlEmailVerifyRegister, sendEmailWithTemplate } from '../../utils/email';
 import type {
   AuthResponseType,
+  AuthValidateResponseType,
+  PayloadAccessTokenType,
   RegisterType,
   ResetPasswordResponseType,
   ResetPasswordType,
   VerifyEmailResponseType,
 } from '../../types/auth.type';
 import { UserType } from '../../types/users.type';
+import { ResponseError } from '../../errors';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 jest.mock('../../utils/token', () => ({
@@ -39,6 +42,38 @@ jest.mock('jsonwebtoken', () => ({
 }));
 
 describe('Auth Local Service (Current year: 2024)', () => {
+  describe('authValidate', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should user payload when token is valid', async () => {
+      const token = 'valid-token';
+      const payload: PayloadAccessTokenType = { id: 'user-id', name: 'user-name' };
+      const expected: AuthValidateResponseType = { user: payload };
+
+      (verify as jest.Mock).mockReturnValue(payload);
+      const result = await authLocalService.authValidate(token);
+
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
+    });
+
+    it('should error message when token is invalid', async () => {
+      const token = 'invalid-token';
+      const errorMessage = 'Invalid token';
+      (verify as jest.Mock).mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
+
+      const result = await authLocalService.authValidate(token);
+      const errorResponse = result.data as ResponseError;
+
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
+      expect(result.data).toBeInstanceOf(ResponseError);
+      expect(errorResponse.message).toBe(errorMessage);
+    });
+  });
   describe('login', () => {
     afterEach(() => {
       jest.clearAllMocks();
