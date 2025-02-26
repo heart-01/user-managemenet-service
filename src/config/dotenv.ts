@@ -20,6 +20,7 @@ export const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 export const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 export const TIMEZONE = process.env.TIMEZONE || 'Asia/Bangkok';
 
+export const IPINFO_BASE_URL = process.env.IPINFO_BASE_URL || 'https://ipinfo.io';
 export const IPINFO_API_KEY = process.env.IPINFO_API_KEY || '';
 export const USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT = process.env.USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT || 5;
 
