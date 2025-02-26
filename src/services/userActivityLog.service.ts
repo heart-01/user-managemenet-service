@@ -12,7 +12,9 @@ import { IPInfoType, UserActivityLogType } from '../types/userActivityLog';
 const getIPInfo = async (ipAddress: string): Promise<ResponseCommonType<IPInfoType | Error>> => {
   try {
     loggerService.info('getIPInfo');
-    const result = await ipinfoAxios.get<IPInfoType>(`/${ipAddress}?token=${IPINFO_API_KEY}`);
+    const result = await ipinfoAxios.get<IPInfoType>(`/${ipAddress}`, {
+      params: { token: IPINFO_API_KEY },
+    });
     return {
       status: HTTP_RESPONSE_CODE.OK,
       data: result.data,
