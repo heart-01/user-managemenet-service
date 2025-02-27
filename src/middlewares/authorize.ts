@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 import { subject } from '@casl/ability';
 import { defineAbilitiesFor } from '../config/ability';
 import { AuthRequest } from '../types/auth.type';

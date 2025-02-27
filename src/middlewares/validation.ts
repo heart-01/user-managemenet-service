@@ -1,5 +1,5 @@
 import Joi, { ValidationError } from 'joi';
-import { Request, NextFunction, Response } from 'express';
+import type { Request, NextFunction, Response } from 'express';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 
 type JoiOptionsDataType = 'body' | 'params' | 'query';

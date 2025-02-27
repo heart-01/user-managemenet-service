@@ -1,5 +1,5 @@
 import { verify } from 'jsonwebtoken';
-import { Response, NextFunction } from 'express';
+import type { Response, NextFunction } from 'express';
 import { loggerService } from '../services';
 import { prisma } from '../config/database';
 import { JWT_SECRET } from '../config/dotenv';

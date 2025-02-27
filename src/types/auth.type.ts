@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import type { Request } from 'express';
 import { UserType } from './users.type';
 import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 
