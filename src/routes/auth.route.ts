@@ -202,7 +202,7 @@ authRouter.post(
   '/google/login',
   validateSchemaMiddleware({
     options: JOI_OPTIONS.body,
-    schema: authValidator.localAuth,
+    schema: authValidator.googleAuth,
   }),
   authController.googleAuth,
 );
