@@ -18,7 +18,7 @@ const prismaTransactionMock = {
   user: { create: jest.fn(), update: jest.fn() },
   authProvider: { create: jest.fn() },
   policy: { findMany: jest.fn() },
-  userPolicy: { createMany: jest.fn() },
+  userPolicy: { createMany: jest.fn(), upsert: jest.fn() },
 };
 jest.mock('../../config/database', () => ({
   prisma: {
@@ -190,6 +190,22 @@ describe('Auth Google Service (Current year: 2024)', () => {
         updatedAt: new Date(),
         latestLoginAt: new Date(),
       };
+      const mockPolicies: Policy[] = [
+        {
+          id: '31111111-1111-1111-1111-111111111111',
+          content: 'Termofservices policy',
+          type: POLICY_TYPE.TERMOFSERVICES,
+          version: '1.0.0',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      ];
+      const mockUserPolicy = {
+        id: '51111111-1111-1111-1111-111111111111',
+        userId,
+        policyId: '31111111-1111-1111-1111-111111111111',
+        agreedAt: new Date(),
+      };
       const mockAuthProvider: AuthProvider = {
         id: '21111111-1111-1111-1111-111111111111',
         userId,
@@ -225,6 +241,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       });
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockUser);
       (prismaTransactionMock.user.update as jest.Mock).mockResolvedValue(mockUser);
+      (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
+      (prismaTransactionMock.userPolicy.upsert as jest.Mock).mockResolvedValue(mockUserPolicy);
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
