@@ -109,6 +109,7 @@ model UserPolicy {
   user   User   @relation(fields: [userId], references: [id])
   policy Policy @relation(fields: [policyId], references: [id])
 
+  @@unique([userId, policyId])
   @@map("user_policies")
 }
 

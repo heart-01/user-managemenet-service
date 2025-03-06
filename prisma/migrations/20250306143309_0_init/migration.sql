@@ -102,6 +102,9 @@ CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 -- CreateIndex
 CREATE UNIQUE INDEX "auth_providers_provider_user_id_key" ON "auth_providers"("provider_user_id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "user_policies_user_id_policy_id_key" ON "user_policies"("user_id", "policy_id");
+
 -- AddForeignKey
 ALTER TABLE "auth_providers" ADD CONSTRAINT "auth_providers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
