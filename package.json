@@ -6,7 +6,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "scripts": {
-    "prestart": "npm run update:type && dotenv -e .env.prod -- npm run migrate && npm run seed",
+    "prestart": "npm run update:type && dotenv -e .env.dev -- npm run migrate && npm run seed",
     "start": "dotenv -e .env.prod -- node dist/app.js",
     "build": "prisma generate && tsc --build tsconfig.json",
     "debug": "dotenv -e .env.dev -- npm run migrate && npm run seed && tsc --build tsconfig.json && tsc-watch --onSuccess \"node --inspect=0.0.0.0:9229 ./dist/app.js\"",
@@ -22,7 +22,7 @@
     "prebuild": "npm run prettier -- --list-different && npm run lint",
     "update:type": "prisma generate",
     "seed": "prisma db seed",
-    "migrate:gen": "prisma migrate dev --create-only --name ",
+    "migrate:gen": "dotenv -e .env.dev -- prisma migrate dev --create-only --name",
     "migrate": "prisma migrate deploy"
   },
   "description": "User Management Service",
