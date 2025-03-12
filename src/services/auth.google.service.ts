@@ -128,14 +128,23 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     // Case when user unlinked provider the user but signIn google again
     if (user && !authProvider) {
       await runTransaction(async (prismaTransaction) => {
+        // Update name user if not exist
+        if (!user?.name) {
+          await prismaTransaction.user.update({
+            where: {
+              id: user.id,
+            },
+            data: {
+              name: userPayload.name,
+            },
+          });
+        }
         // Update user status to activated
         await prismaTransaction.user.update({
           where: {
             id: user.id,
           },
           data: {
-            name: userPayload.name,
-            email: userPayload.email,
             status: USER_STATUS.ACTIVATED,
             latestLoginAt: new Date(),
           },
