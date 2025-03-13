@@ -10,8 +10,14 @@ import {
   ResetPasswordType,
   LocalAuthType,
   AuthValidateType,
+  GetAuthProviderQueryType,
 } from '../types/auth.type';
-import { authGoogleService, authLocalService, userActivityLogService } from '../services';
+import {
+  authService,
+  authGoogleService,
+  authLocalService,
+  userActivityLogService,
+} from '../services';
 import { USER_ACTIVITY_LOG_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 
@@ -105,6 +111,14 @@ export const resetPassword = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
+export const getAuthProvider = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { userId } = request.query as GetAuthProviderQueryType;
+  const result = await authService.getAuthProvider(userId);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
 export default {
   authValidate,
   googleAuth,
@@ -114,4 +128,5 @@ export default {
   register,
   sendEmailResetPassword,
   resetPassword,
+  getAuthProvider,
 };

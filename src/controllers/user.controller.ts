@@ -1,7 +1,11 @@
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { userService } from '../services';
 import logger from '../services/logger.service';
-import { CheckUsernameQueryType, GetUserParamType } from '../types/users.type';
+import type {
+  CheckUsernameQueryType,
+  GetUserParamType,
+  UpdateUserBodyType,
+} from '../types/users.type';
 
 export const getUserById = async (request: Request, response: Response) => {
   logger.start(request);
@@ -19,7 +23,27 @@ export const checkUsername = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
+export const updateUser = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { id, bio, name, password } = request.body as UpdateUserBodyType;
+  const data = {
+    ...(bio !== undefined && {
+      bio,
+    }),
+    ...(name !== undefined && {
+      name,
+    }),
+    ...(password !== undefined && {
+      password,
+    }),
+  };
+  const result = await userService.updateUser(id, data);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
 export default {
   getUserById,
   checkUsername,
+  updateUser,
 };

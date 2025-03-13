@@ -74,6 +74,10 @@ const resetPassword: Joi.ObjectSchema = Joi.object().keys({
     .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/),
 });
 
+const getAuthProvider: Joi.ObjectSchema = Joi.object().keys({
+  userId: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
 export default {
   authValidate,
   googleAuth,
@@ -84,4 +88,5 @@ export default {
   register,
   sendEmailResetPassword,
   resetPassword,
+  getAuthProvider,
 };

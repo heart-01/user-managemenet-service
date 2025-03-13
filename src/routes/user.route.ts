@@ -25,13 +25,12 @@ const userRouter: express.Router = express.Router();
  */
 
 /**
- * GET /user/{id}
- * @summary Get User's information
- * @security bearerAuth
- * @tags users
- * @param {string} id.path.required - User ID
- * @return {UserSuccessResponse} 200 - Success response - application/json
- * @return {string} 404 - User not found - application/json
+ * Update user type
+ * @typedef {object} UserUpdateType
+ * @property {string} id.required
+ * @property {string} bio
+ * @property {string} name
+ * @property {string} password
  */
 
 /**
@@ -43,7 +42,6 @@ const userRouter: express.Router = express.Router();
  * @return {boolean} 200 - Username is not available - application/json
  * @return {string} 500 - Internal server error - application/json
  */
-
 userRouter.get(
   '/check-username',
   validateSchemaMiddleware({
@@ -53,6 +51,15 @@ userRouter.get(
   userController.checkUsername,
 );
 
+/**
+ * GET /user/{id}
+ * @summary Get User's information
+ * @security bearerAuth
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @return {UserSuccessResponse} 200 - Success response - application/json
+ * @return {string} 404 - User not found - application/json
+ */
 userRouter.get(
   '/:id',
   authenticateMiddleware,
@@ -62,6 +69,25 @@ userRouter.get(
   }),
   authorizeMiddleware(Actions.Read, 'getUserById'),
   userController.getUserById,
+);
+
+/**
+ * PUT /user
+ * @summary Update User's information
+ * @tags users
+ * @security bearerAuth
+ * @param {UserUpdateType} request.body.required
+ * @return {UserSuccessResponse} 200 - Success response - application/json
+ * @return {string} 404 - User not found - application/json
+ */
+userRouter.put(
+  '/',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.updateUser,
+  }),
+  userController.updateUser,
 );
 
 export default userRouter;

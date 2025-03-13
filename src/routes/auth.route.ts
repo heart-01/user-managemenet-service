@@ -189,6 +189,34 @@ const authRouter: express.Router = express.Router();
  * @return {string} 500 - Internal Error - application/json
  */
 
+/**
+ * @typedef {object} AuthProviderSuccessResponse
+ * @property {string} id
+ * @property {string} userId
+ * @property {string} authProvider
+ * @property {string} providerUserId
+ * @property {string} providerEmail
+ * @property {string} linkedAt
+ */
+
+/**
+ * GET /auth
+ * @summary Get Auth Provider
+ * @tags auth
+ * @param {string} userId.query.required - user ID
+ * @return {AuthProviderSuccessResponse[]} 200 - User ID is available - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+authRouter.get(
+  '/',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.query,
+    schema: authValidator.getAuthProvider,
+  }),
+  authController.getAuthProvider,
+);
+
 authRouter.post(
   '/validate',
   validateSchemaMiddleware({

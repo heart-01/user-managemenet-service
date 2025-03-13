@@ -13,3 +13,13 @@ export type UserType = Omit<User, 'password'>;
 export type UserAuthType = UserType & {
   AuthProvider?: [AuthProvider];
 };
+
+export type UserUpdateType = {
+  bio?: string | null;
+  name?: string | null;
+  password?: string;
+};
+
+export type UpdateUserBodyType = UserUpdateType & {
+  id: string;
+};
