@@ -41,7 +41,7 @@ import {
   ResetPasswordType,
   VerifyEmailResponseType,
 } from '../types/auth.type';
-import { EmailSubject } from '../enums/email.enum';
+import { EMAIL_SUBJECT } from '../enums/email.enum';
 
 const authValidate = async (
   token: string,
@@ -130,7 +130,7 @@ const login = async (
       // Send email login device
       await sendEmailWithTemplate({
         to: email,
-        subject: EmailSubject.LoginDevice,
+        subject: EMAIL_SUBJECT.LoginDevice,
         templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
         dynamicTemplateData: { device },
       });
@@ -229,7 +229,7 @@ const sendEmailRegister = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: EmailSubject.Register,
+          subject: EMAIL_SUBJECT.Register,
           templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
           dynamicTemplateData: {
             verificationLink: generateUrlEmailVerifyRegister(accessToken),
@@ -250,7 +250,7 @@ const sendEmailRegister = async (
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         await sendEmailWithTemplate({
           to: email,
-          subject: EmailSubject.Register,
+          subject: EMAIL_SUBJECT.Register,
           templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
           dynamicTemplateData: {
             verificationLink: generateUrlEmailVerifyRegister(accessToken),
@@ -280,7 +280,7 @@ const sendEmailRegister = async (
     });
     await sendEmailWithTemplate({
       to: email,
-      subject: EmailSubject.Register,
+      subject: EMAIL_SUBJECT.Register,
       templateId: SENDGRID_TEMPLATE_VERIFY_EMAIL,
       dynamicTemplateData: {
         verificationLink: generateUrlEmailVerifyRegister(accessToken),
@@ -499,7 +499,7 @@ const sendEmailResetPassword = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: EmailSubject.ResetPassword,
+          subject: EMAIL_SUBJECT.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
             verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
@@ -526,7 +526,7 @@ const sendEmailResetPassword = async (
         });
         await sendEmailWithTemplate({
           to: email,
-          subject: EmailSubject.ResetPassword,
+          subject: EMAIL_SUBJECT.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
             verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
@@ -547,7 +547,7 @@ const sendEmailResetPassword = async (
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         await sendEmailWithTemplate({
           to: email,
-          subject: EmailSubject.ResetPassword,
+          subject: EMAIL_SUBJECT.ResetPassword,
           templateId: SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
           dynamicTemplateData: {
             verificationLink: generateUrlEmailVerifyResetPassword(accessToken),
@@ -611,7 +611,7 @@ const resetPassword = async (
 
     await sendEmailWithTemplate({
       to: result.email,
-      subject: EmailSubject.ChangePassword,
+      subject: EMAIL_SUBJECT.ChangePassword,
       templateId: SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
       dynamicTemplateData: {
         username: result.username,

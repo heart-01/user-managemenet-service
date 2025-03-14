@@ -5,7 +5,7 @@ import { ConflictError, RecordNotFoundError } from '../errors';
 import loggerService from './logger.service';
 import { hashPassword, verifyPassword } from '../utils/hashing';
 import type { ResponseCommonType } from '../types/common.type';
-import type { UserType, UserUpdateType } from '../types/users.type';
+import type { UpdateUserBodyType, UserType } from '../types/users.type';
 
 export const getUserById = async (id: string): Promise<ResponseCommonType<UserType | Error>> => {
   try {
@@ -76,20 +76,31 @@ export const checkUsername = async (
 
 export const updateUser = async (
   id: string,
-  data: UserUpdateType,
+  data: UpdateUserBodyType,
 ): Promise<ResponseCommonType<UserType | Error>> => {
   try {
+    const { username, password } = data;
+
+    // Validate user exist
     const user = await prisma.user.findUnique({
       where: { id },
     });
-
     if (!user) {
       return {
         status: HTTP_RESPONSE_CODE.NOT_FOUND,
         data: new RecordNotFoundError('User not found'),
       };
     }
-    const { password } = data;
+
+    // Validate username
+    if (username && username === user.username) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: new ConflictError('Username already exists'),
+      };
+    }
+
+    // Validate password
     const isPasswordMatch =
       password && user.password ? await verifyPassword(password, user.password) : false;
     if (isPasswordMatch) {
@@ -99,6 +110,7 @@ export const updateUser = async (
       };
     }
 
+    // Update user
     const hashedPassword = password ? await hashPassword(password) : null;
     const result = await prisma.user.update({
       where: {

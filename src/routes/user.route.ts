@@ -26,11 +26,11 @@ const userRouter: express.Router = express.Router();
 
 /**
  * Update user type
- * @typedef {object} UserUpdateType
- * @property {string} id.required
+ * @typedef {object} UpdateUserBodyType
  * @property {string} bio
  * @property {string} name
  * @property {string} password
+ * @property {string} username
  */
 
 /**
@@ -72,21 +72,27 @@ userRouter.get(
 );
 
 /**
- * PUT /user
+ * PATCH /user/{id}
  * @summary Update User's information
- * @tags users
  * @security bearerAuth
- * @param {UserUpdateType} request.body.required
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @param {UpdateUserBodyType} request.body.required
  * @return {UserSuccessResponse} 200 - Success response - application/json
  * @return {string} 404 - User not found - application/json
  */
-userRouter.put(
-  '/',
+userRouter.patch(
+  '/:id',
   authenticateMiddleware,
   validateSchemaMiddleware({
-    options: JOI_OPTIONS.body,
-    schema: userValidator.updateUser,
+    options: JOI_OPTIONS.params,
+    schema: userValidator.updateUserParam,
   }),
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.updateUserBody,
+  }),
+  authorizeMiddleware(Actions.Update, 'updateUser'),
   userController.updateUser,
 );
 

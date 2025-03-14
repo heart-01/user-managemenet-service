@@ -14,12 +14,13 @@ export type UserAuthType = UserType & {
   AuthProvider?: [AuthProvider];
 };
 
-export type UserUpdateType = {
+export type UpdateUserBodyType = {
   bio?: string | null;
   name?: string | null;
   password?: string;
+  username?: string;
 };
 
-export type UpdateUserBodyType = UserUpdateType & {
+export type UpdateUserParamType = {
   id: string;
 };

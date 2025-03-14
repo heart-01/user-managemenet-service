@@ -3,7 +3,7 @@ import { USER_STATUS } from '../../enums/prisma.enum';
 import { prisma } from '../../config/database';
 import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
 import { userService } from '../../services/index';
-import { UserUpdateType } from '../../types/users.type';
+import { UpdateUserBodyType } from '../../types/users.type';
 import { hashPassword, verifyPassword } from '../../utils/hashing';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -61,33 +61,6 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '21111111-1111-1111-1111-111111111111';
       const result = await userService.getUserById(userId);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
-    });
-    it('should return error 409 when duplicate password', async () => {
-      const userId = '11111111-1111-1111-1111-111111111111';
-      const mockUser: User = {
-        id: userId,
-        name: 'test',
-        bio: null,
-        email: 'test@test.com',
-        imageUrl: null,
-        phoneNumber: null,
-        status: USER_STATUS.ACTIVATED,
-        username: null,
-        password: '****',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        latestLoginAt: new Date(),
-      };
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
-      (verifyPassword as jest.Mock).mockResolvedValue(true);
-
-      const data: UserUpdateType = {
-        bio: 'test',
-        name: 'test2',
-        password: 'Abcd1234',
-      };
-      const result = await userService.updateUser(userId, data);
-      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
     });
     it('should return error 500 when database connection has problem', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(null);
@@ -154,9 +127,10 @@ describe('User Service (Current year: 2024)', () => {
     });
     it('should return updated user successful', async () => {
       const userId = '11111111-1111-1111-1111-111111111111';
-      const data: UserUpdateType = {
+      const data: UpdateUserBodyType = {
         bio: 'test',
         name: 'test2',
+        username: 'test',
         password: 'Abcd1234',
       };
       const mockUser: User = {
@@ -181,7 +155,7 @@ describe('User Service (Current year: 2024)', () => {
         imageUrl: null,
         phoneNumber: null,
         status: USER_STATUS.ACTIVATED,
-        username: null,
+        username: 'test',
         password: '****',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -195,7 +169,7 @@ describe('User Service (Current year: 2024)', () => {
         imageUrl: null,
         phoneNumber: null,
         status: USER_STATUS.ACTIVATED,
-        username: null,
+        username: 'test',
         password: '****',
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -211,23 +185,73 @@ describe('User Service (Current year: 2024)', () => {
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
-
     it('should return error 404 when data not found', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'test',
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+      };
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+
+      const data: UpdateUserBodyType = {
+        username: 'test',
+      };
+      const result = await userService.updateUser(userId, data);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
+    });
+    it('should return error 409 when username already exists', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       const userId = '21111111-1111-1111-1111-111111111111';
-      const data: UserUpdateType = {
+      const data: UpdateUserBodyType = {
         bio: 'test',
         name: 'test2',
       };
       const result = await userService.updateUser(userId, data);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
     });
+    it('should return error 409 when duplicate password', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: null,
+        password: '****',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+      };
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      (verifyPassword as jest.Mock).mockResolvedValue(true);
+
+      const data: UpdateUserBodyType = {
+        bio: 'test',
+        name: 'test2',
+        password: 'Abcd1234',
+      };
+      const result = await userService.updateUser(userId, data);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
+    });
     it('should return error 500 when database connection has problem', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(null);
 
       const userId = '11111111-1111-1111-1111-111111111111';
-      const data: UserUpdateType = {
+      const data: UpdateUserBodyType = {
         bio: 'test',
         name: 'test2',
       };

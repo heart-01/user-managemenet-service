@@ -76,6 +76,6 @@ export type ResetPasswordResponseType = {
   user: UserType;
 };
 
-export type GetAuthProviderQueryType = {
+export type GetAuthProviderParamType = {
   userId: string;
 };

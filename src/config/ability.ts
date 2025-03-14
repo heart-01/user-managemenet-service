@@ -9,8 +9,10 @@ export const defineAbilitiesFor = (user: UserType): AppAbility => {
 
   // Define abilities for User
   can(Actions.Read, 'getUserById', { id: user.id });
+  can(Actions.Update, 'updateUser', { id: user.id });
 
   // Define abilities for Auth
+  can(Actions.Read, 'getAuthProvider', { userId: user.id });
   can(Actions.Create, 'register', { userId: user.id });
 
   return build();

@@ -200,20 +200,22 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * GET /auth
+ * GET /auth/{userId}
  * @summary Get Auth Provider
+ * @security bearerAuth
  * @tags auth
- * @param {string} userId.query.required - user ID
+ * @param {string} userId.path.required - User ID
  * @return {AuthProviderSuccessResponse[]} 200 - User ID is available - application/json
  * @return {string} 500 - Internal Error - application/json
  */
 authRouter.get(
-  '/',
+  '/:userId',
   authenticateMiddleware,
   validateSchemaMiddleware({
-    options: JOI_OPTIONS.query,
+    options: JOI_OPTIONS.params,
     schema: authValidator.getAuthProvider,
   }),
+  authorizeMiddleware(Actions.Read, 'getAuthProvider'),
   authController.getAuthProvider,
 );
 

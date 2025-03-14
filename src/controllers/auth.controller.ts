@@ -10,7 +10,7 @@ import {
   ResetPasswordType,
   LocalAuthType,
   AuthValidateType,
-  GetAuthProviderQueryType,
+  GetAuthProviderParamType,
 } from '../types/auth.type';
 import {
   authService,
@@ -113,7 +113,7 @@ export const resetPassword = async (request: Request, response: Response) => {
 
 export const getAuthProvider = async (request: Request, response: Response) => {
   logger.start(request);
-  const { userId } = request.query as GetAuthProviderQueryType;
+  const { userId } = request.params as GetAuthProviderParamType;
   const result = await authService.getAuthProvider(userId);
   response.status(result.status).send(result.data);
   logger.end(request);

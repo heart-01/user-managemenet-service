@@ -5,6 +5,7 @@ import type {
   CheckUsernameQueryType,
   GetUserParamType,
   UpdateUserBodyType,
+  UpdateUserParamType,
 } from '../types/users.type';
 
 export const getUserById = async (request: Request, response: Response) => {
@@ -25,7 +26,8 @@ export const checkUsername = async (request: Request, response: Response) => {
 
 export const updateUser = async (request: Request, response: Response) => {
   logger.start(request);
-  const { id, bio, name, password } = request.body as UpdateUserBodyType;
+  const { id } = request.params as UpdateUserParamType;
+  const { bio, name, password, username } = request.body as UpdateUserBodyType;
   const data = {
     ...(bio !== undefined && {
       bio,
@@ -36,7 +38,11 @@ export const updateUser = async (request: Request, response: Response) => {
     ...(password !== undefined && {
       password,
     }),
+    ...(username !== undefined && {
+      username,
+    }),
   };
+
   const result = await userService.updateUser(id, data);
   response.status(result.status).send(result.data);
   logger.end(request);
