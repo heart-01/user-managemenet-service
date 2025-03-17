@@ -49,7 +49,7 @@ export const localAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { email, password }: LocalAuthType = request.body;
   const device = request.headers['user-agent'] ? request.headers['user-agent'] : undefined;
-  const result = await authLocalService.login(email, password, device);
+  const result = await authLocalService.login(email.toLocaleLowerCase(), password, device);
   await userActivityLogService.createUserActivityLog({
     email,
     ipAddress: request?.clientIp,
@@ -65,7 +65,7 @@ export const localAuth = async (request: Request, response: Response) => {
 export const sendEmailRegister = async (request: Request, response: Response) => {
   logger.start(request);
   const { email }: SendEmailRegisterType = request.body;
-  const result = await authLocalService.sendEmailRegister(email);
+  const result = await authLocalService.sendEmailRegister(email.toLocaleLowerCase());
   response.status(result.status).send(result.data);
 
   logger.end(request);
@@ -89,7 +89,7 @@ export const register = async (request: Request, response: Response) => {
     confirmPassword,
     userPolicy,
     name,
-    username,
+    username: username.toLocaleLowerCase(),
   });
   response.status(result.status).send(result.data);
   logger.end(request);
@@ -98,7 +98,7 @@ export const register = async (request: Request, response: Response) => {
 export const sendEmailResetPassword = async (request: Request, response: Response) => {
   logger.start(request);
   const { email }: SendEmailResetPasswordType = request.body;
-  const result = await authLocalService.sendEmailResetPassword(email);
+  const result = await authLocalService.sendEmailResetPassword(email.toLocaleLowerCase());
   response.status(result.status).send(result.data);
   logger.end(request);
 };
