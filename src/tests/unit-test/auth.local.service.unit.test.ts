@@ -93,6 +93,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -109,7 +110,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-        },
+        } as UserType,
       };
 
       jest
@@ -224,6 +225,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest
@@ -250,6 +252,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest
@@ -276,6 +279,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest
@@ -318,6 +322,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -371,6 +376,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -425,6 +431,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -469,6 +476,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -514,6 +522,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
@@ -652,6 +661,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -668,6 +678,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
+          deletedAt: null,
         },
       };
 
@@ -719,6 +730,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
@@ -795,6 +807,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -851,6 +864,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -907,6 +921,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockNewEmailVerification: EmailVerification = {
         userId,
@@ -955,6 +970,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockEmailVerification: EmailVerification = {
         userId,
@@ -1002,6 +1018,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest
@@ -1052,6 +1069,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected: ResetPasswordResponseType = {
         user: {
@@ -1066,6 +1084,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
+          deletedAt: null,
         },
       };
 

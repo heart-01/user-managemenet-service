@@ -11,6 +11,7 @@ import {
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
+  CLIENT_URL,
 } from '../config/dotenv';
 import { prisma, Prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
@@ -156,7 +157,7 @@ const login = async (
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
             latestLoginAt: user.latestLoginAt,
-          },
+          } as UserType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -380,7 +381,7 @@ const register = async (
     }));
 
     const result = await runTransaction(async (prismaTransaction) => {
-      const userUpdated: UserType = await prismaTransaction.user.update({
+      const userUpdated = await prismaTransaction.user.update({
         where: { id: user.userId },
         data: {
           name: user.name,
@@ -418,7 +419,7 @@ const register = async (
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: { user: result, accessToken, isFirstTimeLogin: true },
+      data: { user: result as UserType, accessToken, isFirstTimeLogin: true },
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -589,7 +590,7 @@ const resetPassword = async (
     }
 
     const hashedPassword = await hashPassword(user.password);
-    const result: UserType = await prisma.user.update({
+    const result = await prisma.user.update({
       where: { id: user.userId },
       data: {
         password: hashedPassword,
@@ -615,12 +616,13 @@ const resetPassword = async (
       templateId: SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
       dynamicTemplateData: {
         username: result.username,
+        resetPasswordLink: `${CLIENT_URL}/forgot-password?email=${result.email}`,
       },
     });
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: { user: result },
+      data: { user: result as UserType },
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
