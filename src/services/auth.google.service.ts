@@ -118,7 +118,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-          },
+          } as UserType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -188,7 +188,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-          },
+          } as UserType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -198,7 +198,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     // Create new user and authProvider
     if (!user && !authProvider) {
       const result = await runTransaction(async (prismaTransaction) => {
-        const newUser: UserType = await prismaTransaction.user.create({
+        const newUser = await prismaTransaction.user.create({
           data: {
             name: userPayload.name,
             email: userPayload.email,
@@ -246,7 +246,7 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
-        data: { user: result, accessToken, isFirstTimeLogin: true },
+        data: { user: result as UserType, accessToken, isFirstTimeLogin: true },
       };
     }
 

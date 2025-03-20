@@ -55,6 +55,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockPolicies: Policy[] = [
         {
@@ -81,6 +82,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
+          deletedAt: null,
         },
       };
 
@@ -117,6 +119,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
         AuthProvider: [
           {
             id: '21111111-1111-1111-1111-111111111111',
@@ -140,6 +143,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -156,7 +160,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-        },
+        } as UserType,
       };
 
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
@@ -229,7 +233,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-        },
+        } as UserType,
       };
 
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
