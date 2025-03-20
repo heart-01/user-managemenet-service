@@ -37,9 +37,14 @@ const updateUserBody: Joi.ObjectSchema = Joi.object().keys({
     .pattern(USERNAME_PATTERN),
 });
 
+const deleteUser: Joi.ObjectSchema = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
 export default {
   getUserById,
   checkUsername,
   updateUserParam,
   updateUserBody,
+  deleteUser,
 };

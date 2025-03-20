@@ -32,6 +32,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected = {
         id: userId,
@@ -46,6 +47,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
@@ -91,6 +93,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected = true;
 
@@ -146,6 +149,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const mockUpdatedUser: User = {
         id: userId,
@@ -160,6 +164,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       const expected = {
         id: userId,
@@ -174,6 +179,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
@@ -200,6 +206,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
@@ -235,6 +242,7 @@ describe('User Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
+        deletedAt: null,
       };
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       (verifyPassword as jest.Mock).mockResolvedValue(true);
@@ -256,6 +264,83 @@ describe('User Service (Current year: 2024)', () => {
         name: 'test2',
       };
       const result = await userService.updateUser(userId, data);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
+      expect(result.data).toStrictEqual(null);
+    });
+  });
+
+  describe('deleteUser', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+    it('should return deleted user successful', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: null,
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: null,
+      };
+      const mockDeletedUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: null,
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: new Date(),
+      };
+      const expected = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: null,
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: new Date(),
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      jest.spyOn(prisma.user, 'update').mockResolvedValue(mockDeletedUser);
+
+      const result = await userService.deleteUser(userId);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
+    });
+    it('should return error 404 when data not found', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      const userId = '21111111-1111-1111-1111-111111111111';
+      const result = await userService.deleteUser(userId);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
+    });
+
+    it('should return error 500 when database connection has problem', async () => {
+      jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(null);
+
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const result = await userService.deleteUser(userId);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
       expect(result.data).toStrictEqual(null);
     });

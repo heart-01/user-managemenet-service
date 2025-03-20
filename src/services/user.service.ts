@@ -12,7 +12,7 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
     loggerService.info('getUserById');
     loggerService.debug('userId', id);
 
-    const result: UserType | null = await prisma.user.findUnique({
+    const result = await prisma.user.findUnique({
       where: { id },
       select: {
         id: true,
@@ -38,7 +38,7 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: result,
+      data: result as UserType,
     };
   } catch (error) {
     return {
@@ -140,7 +140,41 @@ export const updateUser = async (
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: result,
+      data: result as UserType,
+    };
+  } catch (error) {
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: error as Error,
+    };
+  }
+};
+
+export const deleteUser = async (id: string): Promise<ResponseCommonType<UserType | Error>> => {
+  try {
+    // Validate user exist
+    const user = await prisma.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      return {
+        status: HTTP_RESPONSE_CODE.NOT_FOUND,
+        data: new RecordNotFoundError('User not found'),
+      };
+    }
+
+    const result = await prisma.user.update({
+      where: {
+        id,
+      },
+      data: {
+        deletedAt: dayjs().toDate(),
+      },
+    });
+
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: result as UserType,
     };
   } catch (error) {
     return {
@@ -154,4 +188,5 @@ export default {
   getUserById,
   checkUsername,
   updateUser,
+  deleteUser,
 };

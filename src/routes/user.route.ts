@@ -22,6 +22,7 @@ const userRouter: express.Router = express.Router();
  * @property {string} latestLoginAt - Last login timestamp
  * @property {string} createdAt - Account creation timestamp
  * @property {string} updatedAt - Last update timestamp
+ * @property {string} deletedAt - Delete timestamp
  */
 
 /**
@@ -94,6 +95,26 @@ userRouter.patch(
   }),
   authorizeMiddleware(Actions.Update, 'updateUser'),
   userController.updateUser,
+);
+
+/**
+ * DELETE /user/{id}
+ * @summary Delete User's information
+ * @security bearerAuth
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @return {UserSuccessResponse} 200 - Success response - application/json
+ * @return {string} 404 - User not found - application/json
+ */
+userRouter.delete(
+  '/:id',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: userValidator.deleteUser,
+  }),
+  authorizeMiddleware(Actions.Delete, 'deleteUser'),
+  userController.deleteUser,
 );
 
 export default userRouter;
