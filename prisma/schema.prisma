@@ -55,6 +55,7 @@ model User {
   latestLoginAt     DateTime            @default(now()) @map("latest_login_at") @db.Timestamptz(3)
   createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt         DateTime            @default(now()) @map("updated_at") @db.Timestamptz(3)
+  deletedAt         DateTime?           @map("deleted_at") @db.Timestamptz(3)
   AuthProvider      AuthProvider[]
   EmailVerification EmailVerification[]
   UserPolicy        UserPolicy[]
