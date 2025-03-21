@@ -4,21 +4,31 @@ import type { SignOptions } from 'jsonwebtoken';
 import loggerService from './logger.service';
 import authValidator from '../validators/auth.validator';
 import { googleClient } from '../config/googleAuth';
-import { ACCESS_TOKEN_EXPIRES_IN, GOOGLE_CLIENT_ID, JWT_SECRET } from '../config/dotenv';
+import {
+  ACCESS_TOKEN_EXPIRES_IN,
+  GOOGLE_CLIENT_ID,
+  JWT_SECRET,
+  SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
+} from '../config/dotenv';
 import { prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, AUTH_PROVIDER_NAME } from '../enums/prisma.enum';
+import { EMAIL_SUBJECT } from '../enums/email.enum';
 import { UserType, UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType, PayloadAccessTokenType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
+import { sendEmailWithTemplate } from '../utils/email';
 import {
   AuthProviderMismatchError,
   GoogleIdTokenMissingScopeError,
   ResponseError,
 } from '../errors';
 
-const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseType | Error>> => {
+const login = async (
+  idToken: string,
+  device: string | undefined,
+): Promise<ResponseCommonType<AuthResponseType | Error>> => {
   try {
     loggerService.info('googleLogin');
     loggerService.debug('token', idToken);
@@ -98,6 +108,13 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
           latestLoginAt: new Date(),
         },
       });
+      // Send email login device
+      await sendEmailWithTemplate({
+        to: user.email,
+        subject: EMAIL_SUBJECT.LoginDevice,
+        templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
+        dynamicTemplateData: { device },
+      });
       const accessToken = generateToken(
         { id: user.id, name: user.name } as PayloadAccessTokenType,
         JWT_SECRET,
@@ -167,6 +184,13 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
             providerEmail: userPayload.email,
           },
         });
+      });
+      // Send email login device
+      await sendEmailWithTemplate({
+        to: user.email,
+        subject: EMAIL_SUBJECT.LoginDevice,
+        templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
+        dynamicTemplateData: { device },
       });
       const accessToken = generateToken(
         { id: user.id, name: user.name } as PayloadAccessTokenType,
@@ -238,6 +262,13 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         });
 
         return newUser;
+      });
+      // Send email login device
+      await sendEmailWithTemplate({
+        to: result.email,
+        subject: EMAIL_SUBJECT.LoginDevice,
+        templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
+        dynamicTemplateData: { device },
       });
       const accessToken = generateToken(
         { id: result.id, name: result.name } as PayloadAccessTokenType,

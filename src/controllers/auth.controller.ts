@@ -32,12 +32,13 @@ export const authValidate = async (request: Request, response: Response) => {
 export const googleAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { idToken }: GoogleAuthType = request.body;
-  const result = await authGoogleService.login(idToken);
+  const device = request.headers['user-agent'] ? request.headers['user-agent'] : undefined;
+  const result = await authGoogleService.login(idToken, device);
   await userActivityLogService.createUserActivityLog({
     email: (jwtDecode(idToken) as { email?: string })?.email || 'unknown',
     ipAddress: request?.clientIp,
     status: result.status,
-    userAgent: request.headers['user-agent'] ? request.headers['user-agent'] : undefined,
+    userAgent: device,
     action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
     failureReason: result.status !== HTTP_RESPONSE_CODE.OK ? String(result.data) : undefined,
   });

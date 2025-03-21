@@ -100,7 +100,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.userPolicy.createMany as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token');
+      const result = await authGoogleService.login('token', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -174,7 +174,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token');
+      const result = await authGoogleService.login('token', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -250,7 +250,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token');
+      const result = await authGoogleService.login('token', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -264,7 +264,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         }),
       });
 
-      const result = await authGoogleService.login('token');
+      const result = await authGoogleService.login('token', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -278,7 +278,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       });
       (prisma.user.findFirst as jest.Mock).mockRejectedValue({ message: 'error' });
 
-      const result = await authGoogleService.login('token');
+      const result = await authGoogleService.login('token', 'Chrome browser');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });
