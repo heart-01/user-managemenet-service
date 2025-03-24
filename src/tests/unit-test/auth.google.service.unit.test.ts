@@ -7,6 +7,7 @@ import { authGoogleService } from '../../services/index';
 import type { AuthResponseType } from '../../types/auth.type';
 import { UserAuthType, UserType } from '../../types/users.type';
 import { generateToken } from '../../utils/token';
+import { sendEmailWithTemplate } from '../../utils/email';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
 jest.mock('../../config/googleAuth', () => ({
@@ -34,6 +35,9 @@ jest.mock('../../config/database', () => ({
 }));
 jest.mock('../../utils/token', () => ({
   generateToken: jest.fn(),
+}));
+jest.mock('../../utils/email.ts', () => ({
+  sendEmailWithTemplate: jest.fn(),
 }));
 
 describe('Auth Google Service (Current year: 2024)', () => {
@@ -98,6 +102,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(null);
       (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
       (prismaTransactionMock.userPolicy.createMany as jest.Mock).mockResolvedValue(null);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
       const result = await authGoogleService.login('token', 'Chrome browser');
@@ -172,6 +177,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       });
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockFindUser);
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
       const result = await authGoogleService.login('token', 'Chrome browser');
@@ -248,6 +254,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
       (prismaTransactionMock.userPolicy.upsert as jest.Mock).mockResolvedValue(mockUserPolicy);
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
       const result = await authGoogleService.login('token', 'Chrome browser');
