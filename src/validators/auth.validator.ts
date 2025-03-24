@@ -65,8 +65,11 @@ const sendEmailResetPassword: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
 });
 
-const resetPassword: Joi.ObjectSchema = Joi.object().keys({
-  userId: Joi.string().guid({ version: 'uuidv4' }).required(),
+const resetPasswordParam: Joi.ObjectSchema = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
+const resetPasswordBody: Joi.ObjectSchema = Joi.object().keys({
   password: Joi.string()
     .required()
     .min(PASSWORD_VALIDATE.MIN)
@@ -92,6 +95,7 @@ export default {
   userPayloadSchema,
   register,
   sendEmailResetPassword,
-  resetPassword,
+  resetPasswordParam,
+  resetPasswordBody,
   getAuthProvider,
 };

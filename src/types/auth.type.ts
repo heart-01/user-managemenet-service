@@ -66,8 +66,11 @@ export type SendEmailResetPasswordType = {
   email: string;
 };
 
-export type ResetPasswordType = {
-  userId: string;
+export type ResetPasswordParamType = {
+  id: string;
+};
+
+export type ResetPasswordBodyType = {
   password: string;
   confirmPassword: string;
 };

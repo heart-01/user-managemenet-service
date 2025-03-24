@@ -7,10 +7,11 @@ import {
   RegisterType,
   VerifyEmailType,
   SendEmailResetPasswordType,
-  ResetPasswordType,
   LocalAuthType,
   AuthValidateType,
   GetAuthProviderParamType,
+  ResetPasswordBodyType,
+  ResetPasswordParamType,
 } from '../types/auth.type';
 import {
   authService,
@@ -106,8 +107,9 @@ export const sendEmailResetPassword = async (request: Request, response: Respons
 
 export const resetPassword = async (request: Request, response: Response) => {
   logger.start(request);
-  const { userId, password, confirmPassword }: ResetPasswordType = request.body;
-  const result = await authLocalService.resetPassword({ userId, password, confirmPassword });
+  const { id } = request.params as ResetPasswordParamType;
+  const { password, confirmPassword }: ResetPasswordBodyType = request.body;
+  const result = await authLocalService.resetPassword(id, { password, confirmPassword });
   response.status(result.status).send(result.data);
   logger.end(request);
 };

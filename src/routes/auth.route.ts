@@ -168,7 +168,6 @@ const authRouter: express.Router = express.Router();
 
 /**
  * @typedef {object} ResetPasswordRequest
- * @property {string} userId - User's ID
  * @property {string} password.required - New password
  * @property {string} confirmPassword.required - New password confirmation
  */
@@ -179,9 +178,10 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
- * POST /auth/local/reset-password
+ * PATCH /auth/local/reset-password/{id}
  * @summary Local Reset Password
  * @tags auth
+ * @param {string} id.path.required - User ID
  * @param {ResetPasswordRequest} request.body.required - User reset password request
  * @return {ResetPasswordResponse} 201 - Success response - application/json
  * @return {string} 400 - Bad request - application/json
@@ -285,14 +285,18 @@ authRouter.post(
   authController.sendEmailResetPassword,
 );
 
-authRouter.post(
-  '/local/reset-password',
+authRouter.patch(
+  '/local/reset-password/:id',
   authenticateMiddleware,
   validateSchemaMiddleware({
-    options: JOI_OPTIONS.body,
-    schema: authValidator.resetPassword,
+    options: JOI_OPTIONS.params,
+    schema: authValidator.resetPasswordParam,
   }),
-  authorizeMiddleware(Actions.Create, 'resetPassword'),
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.resetPasswordBody,
+  }),
+  authorizeMiddleware(Actions.Update, 'resetPassword'),
   authController.resetPassword,
 );
 

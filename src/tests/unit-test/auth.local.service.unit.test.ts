@@ -18,7 +18,7 @@ import type {
   PayloadAccessTokenType,
   RegisterType,
   ResetPasswordResponseType,
-  ResetPasswordType,
+  ResetPasswordBodyType,
   VerifyEmailResponseType,
 } from '../../types/auth.type';
 import { UserType } from '../../types/users.type';
@@ -1091,24 +1091,19 @@ describe('Auth Local Service (Current year: 2024)', () => {
       (hashPassword as jest.Mock).mockResolvedValue('****');
       jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUser as User);
       (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
-      const user: ResetPasswordType = {
-        userId,
-        password: '1234',
-        confirmPassword: '1234',
-      };
-      const result = await authLocalService.resetPassword(user);
+      const user: ResetPasswordBodyType = { password: '1234', confirmPassword: '1234' };
+      const result = await authLocalService.resetPassword(userId, user);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
 
     it('should return error 400 when password and confirm password not match', async () => {
       const userId = '11111111-1111-1111-1111-111111111111';
-      const user: ResetPasswordType = {
-        userId,
+      const user: ResetPasswordBodyType = {
         password: '1234',
         confirmPassword: '12345',
       };
-      const result = await authLocalService.resetPassword(user);
+      const result = await authLocalService.resetPassword(userId, user);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.BAD_REQUEST);
     });
 
@@ -1123,12 +1118,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       (hashPassword as jest.Mock).mockResolvedValue('****');
       jest.spyOn(prisma.user, 'update').mockRejectedValue(mockErrorPrismaUpdate);
 
-      const user: ResetPasswordType = {
-        userId,
-        password: '1234',
-        confirmPassword: '1234',
-      };
-      const result = await authLocalService.resetPassword(user);
+      const user: ResetPasswordBodyType = { password: '1234', confirmPassword: '1234' };
+      const result = await authLocalService.resetPassword(userId, user);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
     });
 
@@ -1137,12 +1128,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
 
       jest.spyOn(prisma.user, 'update').mockRejectedValue({ message: 'error' });
 
-      const user: ResetPasswordType = {
-        userId,
-        password: '1234',
-        confirmPassword: '1234',
-      };
-      const result = await authLocalService.resetPassword(user);
+      const user: ResetPasswordBodyType = { password: '1234', confirmPassword: '1234' };
+      const result = await authLocalService.resetPassword(userId, user);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });

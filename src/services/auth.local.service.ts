@@ -38,8 +38,8 @@ import {
   PayloadAccessTokenType,
   PayloadTokenVerifyEmailType,
   RegisterType,
+  ResetPasswordBodyType,
   ResetPasswordResponseType,
-  ResetPasswordType,
   VerifyEmailResponseType,
 } from '../types/auth.type';
 import { EMAIL_SUBJECT } from '../enums/email.enum';
@@ -576,7 +576,8 @@ const sendEmailResetPassword = async (
 };
 
 const resetPassword = async (
-  user: ResetPasswordType,
+  id: string,
+  user: ResetPasswordBodyType,
 ): Promise<ResponseCommonType<ResetPasswordResponseType | Error>> => {
   try {
     loggerService.info('resetPassword');
@@ -591,7 +592,7 @@ const resetPassword = async (
 
     const hashedPassword = await hashPassword(user.password);
     const result = await prisma.user.update({
-      where: { id: user.userId },
+      where: { id },
       data: {
         password: hashedPassword,
       },
