@@ -292,6 +292,7 @@ authRouter.post(
     options: JOI_OPTIONS.body,
     schema: authValidator.resetPassword,
   }),
+  authorizeMiddleware(Actions.Create, 'resetPassword'),
   authController.resetPassword,
 );
 

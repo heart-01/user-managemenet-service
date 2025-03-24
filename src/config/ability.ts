@@ -15,6 +15,7 @@ export const defineAbilitiesFor = (user: UserType): AppAbility => {
   // Define abilities for Auth
   can(Actions.Read, 'getAuthProvider', { userId: user.id });
   can(Actions.Create, 'register', { userId: user.id });
+  can(Actions.Update, 'resetPassword', { userId: user.id });
 
   return build();
 };
