@@ -17,10 +17,6 @@ const googleAuth: Joi.ObjectSchema = Joi.object().keys({
 
 const localAuth: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
-  password: Joi.string()
-    .min(PASSWORD_VALIDATE.MIN)
-    .max(PASSWORD_VALIDATE.MAX)
-    .pattern(PASSWORD_PATTERN),
 });
 
 const sendEmailRegister: Joi.ObjectSchema = Joi.object().keys({
