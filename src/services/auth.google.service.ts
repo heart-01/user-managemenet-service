@@ -49,6 +49,7 @@ const login = async (
         data: new GoogleIdTokenMissingScopeError(),
       };
     }
+    userPayload.name = userPayload.name.replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '').substring(0, 30);
 
     // Get user and authProvider
     let user = (await prisma.user.findFirst({
