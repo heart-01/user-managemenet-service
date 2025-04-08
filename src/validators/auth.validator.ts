@@ -15,8 +15,22 @@ const googleAuth: Joi.ObjectSchema = Joi.object().keys({
   idToken: Joi.string().required(),
 });
 
+const googleLinkAccountParam = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
+const googleLinkAccountBody = Joi.object().keys({
+  providerUserId: Joi.string().required(),
+  providerEmail: Joi.string().email().required(),
+});
+
+const googleUnlinkAccountParam = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
 const localAuth: Joi.ObjectSchema = Joi.object().keys({
   email: Joi.string().email().required(),
+  password: Joi.string().required(),
 });
 
 const sendEmailRegister: Joi.ObjectSchema = Joi.object().keys({
@@ -85,6 +99,9 @@ const getAuthProvider: Joi.ObjectSchema = Joi.object().keys({
 export default {
   authValidate,
   googleAuth,
+  googleLinkAccountParam,
+  googleLinkAccountBody,
+  googleUnlinkAccountParam,
   localAuth,
   sendEmailRegister,
   verifyEmail,

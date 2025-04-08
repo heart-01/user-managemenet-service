@@ -12,6 +12,9 @@ import {
   GetAuthProviderParamType,
   ResetPasswordBodyType,
   ResetPasswordParamType,
+  GoogleLinkAccountParamType,
+  GoogleLinkAccountBodyType,
+  GoogleUnlinkAccountParamType,
 } from '../types/auth.type';
 import {
   authService,
@@ -47,6 +50,23 @@ export const googleAuth = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
+export const googleLinkAccount = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { providerEmail, providerUserId }: GoogleLinkAccountBodyType = request.body;
+  const { id } = request.params as GoogleLinkAccountParamType;
+  const result = await authGoogleService.linkAccount({ providerEmail, providerUserId, userId: id });
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
+export const googleUnlinkAccount = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { id } = request.params as GoogleUnlinkAccountParamType;
+  const result = await authGoogleService.unlinkAccount(id);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
 export const localAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { email, password }: LocalAuthType = request.body;
@@ -69,7 +89,6 @@ export const sendEmailRegister = async (request: Request, response: Response) =>
   const { email }: SendEmailRegisterType = request.body;
   const result = await authLocalService.sendEmailRegister(email.toLocaleLowerCase());
   response.status(result.status).send(result.data);
-
   logger.end(request);
 };
 
@@ -125,6 +144,8 @@ export const getAuthProvider = async (request: Request, response: Response) => {
 export default {
   authValidate,
   googleAuth,
+  googleLinkAccount,
+  googleUnlinkAccount,
   localAuth,
   sendEmailRegister,
   verifyEmail,

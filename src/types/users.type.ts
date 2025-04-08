@@ -8,10 +8,11 @@ export type CheckUsernameQueryType = {
   username: string;
 };
 
-export type UserType = Omit<User, 'password'>;
+export type UserType = Omit<User, 'password' | 'deletedAt'>;
 
 export type UserAuthType = UserType & {
-  AuthProvider?: [AuthProvider];
+  password: boolean;
+  AuthProvider: [AuthProvider] | [];
 };
 
 export type UpdateUserBodyType = {

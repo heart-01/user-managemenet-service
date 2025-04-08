@@ -24,8 +24,35 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
+ * @typedef {object} AuthProviderSuccessResponse
+ * @property {string} id - Auth provider ID
+ * @property {string} userId - User ID
+ * @property {string} authProvider - Authentication provider name
+ * @property {string} providerUserId - Provider's user ID
+ * @property {string} providerEmail - Provider's email address
+ * @property {Date} linkedAt - Timestamp when the provider was linked
+ */
+
+/**
+ * @typedef {object} UserAuth
+ * @property {string} id - User ID
+ * @property {string} name - User's name
+ * @property {string} phoneNumber - User's phone number
+ * @property {string} bio - User's biography
+ * @property {string} username - User's username
+ * @property {string} password - User's password
+ * @property {string} email - User's email address
+ * @property {string} imageUrl - URL to user's profile image
+ * @property {string} status - User's status
+ * @property {string} latestLoginAt - Last login timestamp
+ * @property {string} createdAt - Account creation timestamp
+ * @property {string} updatedAt - Last update timestamp
+ * @property {AuthProviderSuccessResponse} AuthProvider - Authentication provider
+ */
+
+/**
  * @typedef {object} AuthSuccessResponse
- * @property {User} user - User data
+ * @property {UserAuth} user - User data
  * @property {string} accessToken - JWT access token
  * @property {boolean} isFirstTimeLogin - Indicates if this is the user's first login
  */
@@ -46,11 +73,16 @@ const authRouter: express.Router = express.Router();
  */
 
 /**
+ * @typedef {object} AuthValidateResponse
+ * @property {string} user - user
+ */
+
+/**
  * POST /auth/validate
  * @summary Auth Validate JWT Token
  * @tags auth
  * @param {AuthValidateRequest} request.body.required - JWT Token
- * @return {AuthSuccessResponse} 200 - Success response - application/json
+ * @return {AuthValidateResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
  */
 
@@ -65,6 +97,33 @@ const authRouter: express.Router = express.Router();
  * @tags auth
  * @param {GoogleAuthRequest} request.body.required - Google Auth idToken
  * @return {AuthSuccessResponse} 200 - Success response - application/json
+ * @return {string} 401 - Unauthorized - application/json
+ */
+
+/**
+ * @typedef {object} GoogleLinkAccountRequest
+ * @property {string} providerUserId.required - Provider's user ID
+ * @property {string} providerEmail.required - Provider's email address
+ */
+
+/**
+ * PATCH /auth/google/link/{id}
+ * @summary Link Google Auth For User
+ * @security bearerAuth
+ * @tags auth
+ * @param {string} id.path.required - User ID
+ * @param {GoogleLinkAccountRequest} request.body.required - Google Auth provider data
+ * @return {AuthProviderSuccessResponse} 200 - Success response - application/json
+ * @return {string} 401 - Unauthorized - application/json
+ */
+
+/**
+ * PATCH /auth/google/unlink/{id}
+ * @summary Unlink Google Auth For User
+ * @security bearerAuth
+ * @tags auth
+ * @param {string} id.path.required - User ID
+ * @return {AuthProviderSuccessResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
  */
 
@@ -235,6 +294,32 @@ authRouter.post(
     schema: authValidator.googleAuth,
   }),
   authController.googleAuth,
+);
+
+authRouter.patch(
+  '/google/link/:id',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: authValidator.googleLinkAccountParam,
+  }),
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: authValidator.googleLinkAccountBody,
+  }),
+  authorizeMiddleware(Actions.Update, 'updateAuthProvider'),
+  authController.googleLinkAccount,
+);
+
+authRouter.patch(
+  '/google/unlink/:id',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: authValidator.googleUnlinkAccountParam,
+  }),
+  authorizeMiddleware(Actions.Update, 'updateAuthProvider'),
+  authController.googleUnlinkAccount,
 );
 
 authRouter.post(

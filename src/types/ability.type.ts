@@ -8,6 +8,7 @@ export type AppSubjects = Subjects<{
   getAuthProvider: { userId: string };
   register: { userId: string };
   resetPassword: { userId: string };
+  updateAuthProvider: { id: string };
 }>;
 
 export type AppAbility = PureAbility<[string, AppSubjects], PrismaQuery>;

@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { UserType } from './users.type';
+import { UserAuthType, UserType } from './users.type';
 import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 
 export type AuthRequest = Request & {
@@ -19,12 +19,25 @@ export type GoogleAuthType = {
   idToken: string;
 };
 
+export type GoogleLinkAccountParamType = {
+  id: string;
+};
+
+export type GoogleLinkAccountBodyType = {
+  providerUserId: string;
+  providerEmail: string;
+};
+
+export type GoogleUnlinkAccountParamType = {
+  id: string;
+};
+
 export type SendEmailRegisterType = {
   email: string;
 };
 
 export type AuthResponseType = {
-  user: UserType;
+  user: UserAuthType;
   accessToken: string;
   isFirstTimeLogin: boolean;
 };

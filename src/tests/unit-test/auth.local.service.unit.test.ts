@@ -21,7 +21,7 @@ import type {
   ResetPasswordBodyType,
   VerifyEmailResponseType,
 } from '../../types/auth.type';
-import { UserType } from '../../types/users.type';
+import { UserAuthType, UserType } from '../../types/users.type';
 import { ResponseError } from '../../errors';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -92,8 +92,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: null,
         createdAt: new Date(),
         updatedAt: new Date(),
-        latestLoginAt: new Date(),
         deletedAt: null,
+        latestLoginAt: new Date(),
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -103,6 +103,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
           name: 'test',
           bio: null,
           email: 'test@test.com',
+          password: true,
           imageUrl: null,
           phoneNumber: null,
           status: USER_STATUS.ACTIVATED,
@@ -110,7 +111,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-        } as UserType,
+          AuthProvider: [],
+        } as UserAuthType,
       };
 
       jest
@@ -661,7 +663,6 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
-        deletedAt: null,
       };
       const expected: AuthResponseType = {
         accessToken: 'accessToken',
@@ -675,10 +676,11 @@ describe('Auth Local Service (Current year: 2024)', () => {
           phoneNumber: null,
           status: USER_STATUS.ACTIVATED,
           username: 'test',
+          password: false,
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-          deletedAt: null,
+          AuthProvider: [],
         },
       };
 
@@ -1069,7 +1071,6 @@ describe('Auth Local Service (Current year: 2024)', () => {
         createdAt: new Date(),
         updatedAt: new Date(),
         latestLoginAt: new Date(),
-        deletedAt: null,
       };
       const expected: ResetPasswordResponseType = {
         user: {
@@ -1084,7 +1085,6 @@ describe('Auth Local Service (Current year: 2024)', () => {
           createdAt: new Date(),
           updatedAt: new Date(),
           latestLoginAt: new Date(),
-          deletedAt: null,
         },
       };
 

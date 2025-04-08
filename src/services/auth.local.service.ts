@@ -16,7 +16,7 @@ import {
 import { prisma, Prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
-import { UserType } from '../types/users.type';
+import { UserAuthType, UserType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import {
   generateUrlEmailVerifyRegister,
@@ -88,7 +88,24 @@ const login = async (
       };
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
+    const user = await prisma.user.findUnique({
+      where: { email },
+      select: {
+        id: true,
+        name: true,
+        phoneNumber: true,
+        bio: true,
+        username: true,
+        password: true,
+        email: true,
+        imageUrl: true,
+        status: true,
+        latestLoginAt: true,
+        createdAt: true,
+        updatedAt: true,
+        AuthProvider: true,
+      },
+    });
 
     // Case user status is pending
     if (user && user.status === USER_STATUS.PENDING) {
@@ -149,6 +166,7 @@ const login = async (
             id: user.id,
             bio: user.bio,
             username: user.username,
+            password: Boolean(user.password),
             email: user.email,
             imageUrl: user.imageUrl,
             name: user.name,
@@ -157,7 +175,8 @@ const login = async (
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
             latestLoginAt: user.latestLoginAt,
-          } as UserType,
+            AuthProvider: user.AuthProvider ? user.AuthProvider : [],
+          } as UserAuthType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -395,6 +414,7 @@ const register = async (
           phoneNumber: true,
           bio: true,
           username: true,
+          password: true,
           email: true,
           imageUrl: true,
           status: true,
@@ -419,7 +439,25 @@ const register = async (
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: { user: result as UserType, accessToken, isFirstTimeLogin: true },
+      data: {
+        user: {
+          id: result.id,
+          name: result.name,
+          phoneNumber: result.phoneNumber,
+          bio: result.bio,
+          username: result.username,
+          password: Boolean(result.password),
+          email: result.email,
+          imageUrl: result.imageUrl,
+          status: result.status,
+          latestLoginAt: result.latestLoginAt,
+          createdAt: result.createdAt,
+          updatedAt: result.updatedAt,
+          AuthProvider: [],
+        } as UserAuthType,
+        accessToken,
+        isFirstTimeLogin: true,
+      },
     };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {

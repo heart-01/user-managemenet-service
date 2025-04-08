@@ -14,7 +14,7 @@ import { prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, AUTH_PROVIDER_NAME } from '../enums/prisma.enum';
 import { EMAIL_SUBJECT } from '../enums/email.enum';
-import { UserType, UserAuthType } from '../types/users.type';
+import { UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType, PayloadAccessTokenType } from '../types/auth.type';
 import { generateToken } from '../utils/token';
@@ -22,6 +22,7 @@ import { sendEmailWithTemplate } from '../utils/email';
 import {
   AuthProviderMismatchError,
   GoogleIdTokenMissingScopeError,
+  RecordNotFoundError,
   ResponseError,
 } from '../errors';
 
@@ -66,6 +67,7 @@ const login = async (
         phoneNumber: true,
         bio: true,
         username: true,
+        password: true,
         email: true,
         imageUrl: true,
         status: true,
@@ -86,6 +88,7 @@ const login = async (
           phoneNumber: true,
           bio: true,
           username: true,
+          password: true,
           email: true,
           imageUrl: true,
           status: true,
@@ -130,13 +133,15 @@ const login = async (
             phoneNumber: user.phoneNumber,
             bio: user.bio,
             username: user.username,
+            password: Boolean(user.password),
             email: user.email,
             imageUrl: user.imageUrl,
             status: user.status,
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-          } as UserType,
+            AuthProvider: authProvider ? [authProvider] : [],
+          } as UserAuthType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -145,7 +150,7 @@ const login = async (
 
     // Case when user unlinked provider the user but signIn google again
     if (user && !authProvider) {
-      await runTransaction(async (prismaTransaction) => {
+      const newAuthProvider = await runTransaction(async (prismaTransaction) => {
         // Update name user if not exist
         if (!user?.name) {
           await prismaTransaction.user.update({
@@ -177,7 +182,7 @@ const login = async (
           });
         }
         // Create new authProvider
-        await prismaTransaction.authProvider.create({
+        const newAuthProvider = await prismaTransaction.authProvider.create({
           data: {
             userId: user.id,
             authProvider: AUTH_PROVIDER_NAME.GOOGLE,
@@ -185,6 +190,8 @@ const login = async (
             providerEmail: userPayload.email,
           },
         });
+
+        return newAuthProvider;
       });
       // Send email login device
       await sendEmailWithTemplate({
@@ -207,13 +214,15 @@ const login = async (
             phoneNumber: user.phoneNumber,
             bio: user.bio,
             username: user.username,
+            password: Boolean(user.password),
             email: user.email,
             imageUrl: user.imageUrl,
             status: user.status,
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
-          } as UserType,
+            AuthProvider: [newAuthProvider],
+          } as UserAuthType,
           accessToken,
           isFirstTimeLogin: false,
         },
@@ -235,6 +244,7 @@ const login = async (
             phoneNumber: true,
             bio: true,
             username: true,
+            password: true,
             email: true,
             imageUrl: true,
             status: true,
@@ -243,7 +253,7 @@ const login = async (
             updatedAt: true,
           },
         });
-        await prismaTransaction.authProvider.create({
+        const newAuthProvider = await prismaTransaction.authProvider.create({
           data: {
             userId: newUser.id,
             authProvider: AUTH_PROVIDER_NAME.GOOGLE,
@@ -262,7 +272,21 @@ const login = async (
           data: createUserPolices,
         });
 
-        return newUser;
+        return {
+          id: newUser.id,
+          name: newUser.name,
+          phoneNumber: newUser.phoneNumber,
+          bio: newUser.bio,
+          username: newUser.username,
+          password: Boolean(newUser.password),
+          email: newUser.email,
+          imageUrl: newUser.imageUrl,
+          status: newUser.status,
+          latestLoginAt: newUser.latestLoginAt,
+          createdAt: newUser.createdAt,
+          updatedAt: newUser.updatedAt,
+          AuthProvider: [newAuthProvider],
+        } as UserAuthType;
       });
       // Send email login device
       await sendEmailWithTemplate({
@@ -278,7 +302,7 @@ const login = async (
       );
       return {
         status: HTTP_RESPONSE_CODE.OK,
-        data: { user: result as UserType, accessToken, isFirstTimeLogin: true },
+        data: { user: result, accessToken, isFirstTimeLogin: true },
       };
     }
 
@@ -296,6 +320,104 @@ const login = async (
   }
 };
 
+const linkAccount = async (authProvider: {
+  userId: string;
+  providerUserId: string;
+  providerEmail: string;
+}): Promise<ResponseCommonType<AuthProvider | Error>> => {
+  try {
+    loggerService.info('linkAccount');
+    loggerService.debug('authProvider', authProvider);
+
+    // Validate providerUserId
+    const findAuthProvider = await prisma.authProvider.findFirst({
+      where: {
+        providerUserId: authProvider.providerUserId,
+        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
+      },
+    });
+
+    // Check provider id already exist
+    if (findAuthProvider) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: findAuthProvider,
+      };
+    }
+
+    // Get authProvider from user
+    const userAuthProvider = await prisma.authProvider.findFirst({
+      where: { userId: authProvider.userId, authProvider: AUTH_PROVIDER_NAME.GOOGLE },
+    });
+
+    // Check if user already linked google account
+    if (userAuthProvider) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: userAuthProvider,
+      };
+    }
+
+    // Create new authProvider
+    const newAuthProvider = await prisma.authProvider.create({
+      data: {
+        userId: authProvider.userId,
+        authProvider: AUTH_PROVIDER_NAME.GOOGLE,
+        providerUserId: authProvider.providerUserId,
+        providerEmail: authProvider.providerEmail,
+      },
+    });
+
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: newAuthProvider,
+    };
+  } catch (error) {
+    const err = error as Error;
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: new ResponseError(err.message),
+    };
+  }
+};
+
+const unlinkAccount = async (userId: string): Promise<ResponseCommonType<AuthProvider | Error>> => {
+  try {
+    loggerService.info('unlinkAccount');
+    loggerService.debug('userId', userId);
+
+    // Get authProvider from user
+    const userAuthProvider = await prisma.authProvider.findFirst({
+      where: { userId, authProvider: AUTH_PROVIDER_NAME.GOOGLE },
+    });
+
+    if (!userAuthProvider) {
+      return {
+        status: HTTP_RESPONSE_CODE.NOT_FOUND,
+        data: new RecordNotFoundError('authProvider not found'),
+      };
+    }
+
+    // Delete user authProvider
+    const deleteAuthProvider = await prisma.authProvider.delete({
+      where: { id: userAuthProvider.id },
+    });
+
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: deleteAuthProvider,
+    };
+  } catch (error) {
+    const err = error as Error;
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: new ResponseError(err.message),
+    };
+  }
+};
+
 export default {
   login,
+  linkAccount,
+  unlinkAccount,
 };
