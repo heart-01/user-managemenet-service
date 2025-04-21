@@ -25,3 +25,11 @@ export type UpdateUserBodyType = {
 export type UpdateUserParamType = {
   id: string;
 };
+
+export type UserDeletionFeedbackBodyType = {
+  reason: string;
+};
+
+export type SendEmailDeleteAccountBodyType = {
+  email: string;
+};

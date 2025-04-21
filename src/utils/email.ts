@@ -29,3 +29,6 @@ export const generateUrlEmailVerifyRegister = (accessToken: string): string =>
 
 export const generateUrlEmailVerifyResetPassword = (accessToken: string): string =>
   `${CLIENT_URL}/verify/reset-password?token=${accessToken}`;
+
+export const generateUrlEmailVerifyDeleteAccount = (accessToken: string): string =>
+  `${CLIENT_URL}/verify/delete-account?token=${accessToken}`;

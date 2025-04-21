@@ -35,6 +35,56 @@ const userRouter: express.Router = express.Router();
  */
 
 /**
+ * User Deletion Feedback Request Type
+ * @typedef {object} userDeletionFeedbackRequest
+ * @property {string} reason - Reason for account deletion
+ */
+
+/**
+ * User Deletion Feedback Response Type
+ * @typedef {object} userDeletionFeedbackResponse
+ * @property {string} id - User deletion feedback ID
+ * @property {string} userId - User ID
+ * @property {string} reason - Reason for account deletion
+ * @property {string} createdAt - Feedback creation timestamp
+ */
+
+/**
+ * Send Email Delete Account Request Type
+ * @typedef {object} verifyEmailRequest
+ * @property {string} token.required - Token to verify
+ * @property {string} type.required - Token type
+ */
+
+/**
+ * Verify Email Success Response Type
+ * @typedef {object} verifyEmailSuccessResponse
+ * @property {string} token - token
+ * @property {string} userId - user id
+ * @property {string} type - action type for the token
+ * @property {string} createdAt - token creation timestamp
+ * @property {string} expiredAt - token expiration timestamp
+ * @property {string} completedAt - token completion timestamp
+ */
+
+/**
+ * Send Email Delete Account Request Type
+ * @typedef {object} sendEmailDeleteAccountRequest
+ * @property {string} email.required - Email to send delete account link
+ */
+
+/**
+ * Send Email Delete Account Response Type
+ * @typedef {object} sendEmailDeleteAccountResponse
+ * @property {string} token - token
+ * @property {string} userId - user id
+ * @property {string} type - action type for the token
+ * @property {string} createdAt - token creation timestamp
+ * @property {string} expiredAt - token expiration timestamp
+ * @property {string} completedAt - token completion timestamp
+ */
+
+/**
  * GET /user/check-username
  * @summary Check if username is available
  * @tags users
@@ -115,6 +165,70 @@ userRouter.delete(
   }),
   authorizeMiddleware(Actions.Delete, 'deleteUser'),
   userController.deleteUser,
+);
+
+/**
+ * POST /user/{id}/deletion-feedback
+ * @summary User deletion feedback
+ * @security bearerAuth
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @param {userDeletionFeedbackRequest} request.body.required - User deletion feedback
+ * @return {userDeletionFeedbackResponse} 200 - Success response - application/json
+ * @return {string} 404 - User not found - application/json
+ * @return {string} 500 - Internal server error - application/json
+ */
+userRouter.post(
+  '/:id/deletion-feedback',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: userValidator.userDeletionFeedbackParam,
+  }),
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.userDeletionFeedbackBody,
+  }),
+  authorizeMiddleware(Actions.Create, 'userDeletionFeedback'),
+  userController.userDeletionFeedback,
+);
+
+/**
+ * POST /user/send/email/delete-account
+ * @summary Send email to delete account
+ * @security bearerAuth
+ * @tags users
+ * @param {sendEmailDeleteAccountRequest} request.body.required - Email to send delete account link
+ * @return {sendEmailDeleteAccountResponse} 200 - Success response - application/json
+ * @return {string} 500 - Internal server error - application/json
+ */
+userRouter.post(
+  '/send/email/delete-account',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.sendEmailDeleteAccount,
+  }),
+  userController.sendEmailDeleteAccount,
+);
+
+/**
+ * POST /user/verify/email
+ * @summary Verify Email
+ * @security bearerAuth
+ * @tags auth
+ * @param {verifyEmailRequest} request.body.required - Token to verify
+ * @return {verifyEmailSuccessResponse} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+userRouter.post(
+  '/verify/email',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.verifyEmail,
+  }),
+  userController.verifyEmail,
 );
 
 export default userRouter;

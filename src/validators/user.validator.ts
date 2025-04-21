@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 import {
   PASSWORD_PATTERN,
   PASSWORD_VALIDATE,
@@ -41,10 +42,31 @@ const deleteUser: Joi.ObjectSchema = Joi.object().keys({
   id: Joi.string().guid({ version: 'uuidv4' }).required(),
 });
 
+const userDeletionFeedbackParam: Joi.ObjectSchema = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
+const userDeletionFeedbackBody: Joi.ObjectSchema = Joi.object().keys({
+  reason: Joi.string().trim().min(1).required(),
+});
+
+const sendEmailDeleteAccount: Joi.ObjectSchema = Joi.object().keys({
+  email: Joi.string().email().required(),
+});
+
+const verifyEmail: Joi.ObjectSchema = Joi.object().keys({
+  token: Joi.string().required(),
+  type: Joi.string().valid(...Object.values(EMAIL_VERIFICATION_ACTION_TYPE)),
+});
+
 export default {
   getUserById,
   checkUsername,
   updateUserParam,
   updateUserBody,
   deleteUser,
+  userDeletionFeedbackParam,
+  userDeletionFeedbackBody,
+  sendEmailDeleteAccount,
+  verifyEmail,
 };

@@ -12,6 +12,7 @@ export const defineAbilitiesFor = (user: UserType): AppAbility => {
   can(Actions.Update, 'updateUser', { id: user.id });
   can(Actions.Delete, 'deleteUser', { id: user.id });
   can(Actions.Update, 'updateAuthProvider', { id: user.id });
+  can(Actions.Create, 'userDeletionFeedback', { id: user.id });
 
   // Define abilities for Auth
   can(Actions.Read, 'getAuthProvider', { userId: user.id });
