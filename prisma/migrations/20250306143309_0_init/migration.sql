@@ -5,7 +5,7 @@ CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED');
 CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
 
 -- CreateEnum
-CREATE TYPE "EMAIL_VERIFICATION_ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD');
+CREATE TYPE "EMAIL_VERIFICATION_ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD', 'DELETEACCOUNT');
 
 -- CreateEnum
 CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES', 'EMAILMARKETING');
@@ -94,6 +94,16 @@ CREATE TABLE "user_activity_log" (
     CONSTRAINT "user_activity_log_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "user_deletion_feedback" (
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "reason" TEXT NOT NULL,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_deletion_feedback_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
@@ -117,3 +127,6 @@ ALTER TABLE "user_policies" ADD CONSTRAINT "user_policies_user_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "user_policies" ADD CONSTRAINT "user_policies_policy_id_fkey" FOREIGN KEY ("policy_id") REFERENCES "policies"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_deletion_feedback" ADD CONSTRAINT "user_deletion_feedback_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
