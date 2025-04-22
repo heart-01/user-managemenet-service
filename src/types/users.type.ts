@@ -12,6 +12,7 @@ export type UserType = Omit<User, 'password' | 'deletedAt'>;
 
 export type UserAuthType = UserType & {
   password: boolean;
+  deletedAt: Date | null;
   AuthProvider: [AuthProvider] | [];
 };
 

@@ -20,7 +20,7 @@ const getIPInfo = async (ipAddress: string): Promise<ResponseCommonType<IPInfoTy
       data: result.data,
     };
   } catch (error) {
-    loggerService.error(`getIPInfo: ${error}`);
+    loggerService.error(error);
     return {
       status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
       data: error as Error,

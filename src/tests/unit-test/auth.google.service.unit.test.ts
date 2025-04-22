@@ -65,6 +65,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         password: false,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
         latestLoginAt: new Date(),
       };
       const mockPolicies: Policy[] = [
@@ -100,6 +101,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           password: false,
           createdAt: new Date(),
           updatedAt: new Date(),
+          deletedAt: null,
           latestLoginAt: new Date(),
           AuthProvider: [mockAuthProvider],
         },
@@ -139,6 +141,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         password: false,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
         latestLoginAt: new Date(),
         AuthProvider: [
           {
@@ -181,6 +184,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           password: false,
           createdAt: new Date(),
           updatedAt: new Date(),
+          deletedAt: null,
           latestLoginAt: new Date(),
           AuthProvider: [
             {
@@ -225,6 +229,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         username: null,
         createdAt: new Date(),
         updatedAt: new Date(),
+        deletedAt: null,
         latestLoginAt: new Date(),
       };
       const mockPolicies: Policy[] = [
@@ -266,6 +271,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
           password: false,
           createdAt: new Date(),
           updatedAt: new Date(),
+          deletedAt: null,
           latestLoginAt: new Date(),
           AuthProvider: [mockAuthProvider],
         } as UserAuthType,

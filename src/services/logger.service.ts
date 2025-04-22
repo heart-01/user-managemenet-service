@@ -74,7 +74,7 @@ const debug = (message: string, data: any) => {
 };
 
 const error = (exception: any) => {
-  logger.log('error', exception);
+  logger.log('error', JSON.stringify(exception));
 };
 
 export default { start, end, error, info, debug };

@@ -110,6 +110,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
           username: null,
           createdAt: new Date(),
           updatedAt: new Date(),
+          deletedAt: null,
           latestLoginAt: new Date(),
           AuthProvider: [],
         } as UserAuthType,
@@ -664,7 +665,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         updatedAt: new Date(),
         latestLoginAt: new Date(),
       };
-      const expected: AuthResponseType = {
+      const expected = {
         accessToken: 'accessToken',
         isFirstTimeLogin: true,
         user: {

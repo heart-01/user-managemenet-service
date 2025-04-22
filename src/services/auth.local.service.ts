@@ -59,7 +59,7 @@ const authValidate = async (
       },
     };
   } catch (error) {
-    loggerService.error(error as Error);
+    loggerService.error(error);
     const err = error as Error;
     return {
       status: HTTP_RESPONSE_CODE.UNAUTHORIZED,
@@ -103,6 +103,7 @@ const login = async (
         latestLoginAt: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
         AuthProvider: true,
       },
     });
@@ -174,6 +175,7 @@ const login = async (
             status: user.status,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
             latestLoginAt: user.latestLoginAt,
             AuthProvider: user.AuthProvider ? user.AuthProvider : [],
           } as UserAuthType,

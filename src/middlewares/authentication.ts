@@ -25,7 +25,7 @@ export const authenticateMiddleware = async (
       request.user = user;
       next();
     } catch (error) {
-      loggerService.error(error as Error);
+      loggerService.error(error);
       response.status(HTTP_RESPONSE_CODE.UNAUTHORIZED).send('Invalid token');
     }
   } else {

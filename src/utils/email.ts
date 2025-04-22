@@ -32,3 +32,5 @@ export const generateUrlEmailVerifyResetPassword = (accessToken: string): string
 
 export const generateUrlEmailVerifyDeleteAccount = (accessToken: string): string =>
   `${CLIENT_URL}/verify/delete-account?token=${accessToken}`;
+
+export const generateUrlRedirectHome = (): string => `${CLIENT_URL}`;

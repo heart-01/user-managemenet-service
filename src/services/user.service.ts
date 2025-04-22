@@ -6,6 +6,7 @@ import {
   JWT_SECRET,
   SENDGRID_TEMPLATE_DELETE_ACCOUNT_EMAIL,
   SENDGRID_TEMPLATE_DELETE_ACCOUNT_SUCCESS_EMAIL,
+  SENDGRID_TEMPLATE_RESTORE_ACCOUNT_SUCCESS_EMAIL,
 } from '../config/dotenv';
 import { USER_STATUS, EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
@@ -14,7 +15,11 @@ import { ConflictError, RecordNotFoundError } from '../errors';
 import loggerService from './logger.service';
 import { hashPassword, verifyPassword } from '../utils/hashing';
 import { generateToken } from '../utils/token';
-import { generateUrlEmailVerifyDeleteAccount, sendEmailWithTemplate } from '../utils/email';
+import {
+  generateUrlEmailVerifyDeleteAccount,
+  generateUrlRedirectHome,
+  sendEmailWithTemplate,
+} from '../utils/email';
 import type { ResponseCommonType } from '../types/common.type';
 import type { UpdateUserBodyType, UserType } from '../types/users.type';
 import { PayloadTokenVerifyEmailType } from '../types/auth.type';
@@ -357,6 +362,45 @@ const sendEmailDeleteAccount = async (
   }
 };
 
+export const recoverUser = async (
+  userId: string,
+): Promise<ResponseCommonType<UserType | Error>> => {
+  try {
+    // Validate user exist
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      return {
+        status: HTTP_RESPONSE_CODE.NOT_FOUND,
+        data: new RecordNotFoundError('User not found'),
+      };
+    }
+
+    const result = await prisma.user.update({ where: { id: userId }, data: { deletedAt: null } });
+
+    await sendEmailWithTemplate({
+      to: user.email,
+      subject: EMAIL_SUBJECT.RestoreAccountSuccess,
+      templateId: SENDGRID_TEMPLATE_RESTORE_ACCOUNT_SUCCESS_EMAIL,
+      dynamicTemplateData: {
+        redirectLink: generateUrlRedirectHome(),
+      },
+    });
+
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: result as UserType,
+    };
+  } catch (error) {
+    loggerService.error(error);
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: error as Error,
+    };
+  }
+};
+
 export default {
   getUserById,
   checkUsername,
@@ -364,4 +408,5 @@ export default {
   deleteUser,
   userDeletionFeedback,
   sendEmailDeleteAccount,
+  recoverUser,
 };

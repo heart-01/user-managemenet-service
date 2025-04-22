@@ -15,12 +15,14 @@ import {
   GoogleLinkAccountParamType,
   GoogleLinkAccountBodyType,
   GoogleUnlinkAccountParamType,
+  AuthResponseType,
 } from '../types/auth.type';
 import {
   authService,
   authGoogleService,
   authLocalService,
   userActivityLogService,
+  userService,
 } from '../services';
 import { USER_ACTIVITY_LOG_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
@@ -46,6 +48,13 @@ export const googleAuth = async (request: Request, response: Response) => {
     action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
     failureReason: result.status !== HTTP_RESPONSE_CODE.OK ? String(result.data) : undefined,
   });
+  if (
+    result.status === HTTP_RESPONSE_CODE.OK &&
+    (result.data as AuthResponseType).user.deletedAt !== null
+  ) {
+    const userId = (result.data as AuthResponseType).user.id;
+    await userService.recoverUser(userId);
+  }
   response.status(result.status).send(result.data);
   logger.end(request);
 };
@@ -80,6 +89,13 @@ export const localAuth = async (request: Request, response: Response) => {
     action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
     failureReason: result.status !== HTTP_RESPONSE_CODE.OK ? String(result.data) : undefined,
   });
+  if (
+    result.status === HTTP_RESPONSE_CODE.OK &&
+    (result.data as AuthResponseType).user.deletedAt !== null
+  ) {
+    const userId = (result.data as AuthResponseType).user.id;
+    await userService.recoverUser(userId);
+  }
   response.status(result.status).send(result.data);
   logger.end(request);
 };

@@ -74,6 +74,7 @@ const login = async (
         latestLoginAt: true,
         createdAt: true,
         updatedAt: true,
+        deletedAt: true,
         AuthProvider: true,
       },
     })) as UserAuthType | null;
@@ -95,6 +96,7 @@ const login = async (
           latestLoginAt: true,
           createdAt: true,
           updatedAt: true,
+          deletedAt: true,
           AuthProvider: true,
         },
       })) as UserAuthType | null;
@@ -140,6 +142,7 @@ const login = async (
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
             AuthProvider: authProvider ? [authProvider] : [],
           } as UserAuthType,
           accessToken,
@@ -221,6 +224,7 @@ const login = async (
             latestLoginAt: user.latestLoginAt,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
+            deletedAt: user.deletedAt,
             AuthProvider: [newAuthProvider],
           } as UserAuthType,
           accessToken,
@@ -250,6 +254,7 @@ const login = async (
             status: true,
             latestLoginAt: true,
             createdAt: true,
+            deletedAt: true,
             updatedAt: true,
           },
         });
@@ -285,6 +290,7 @@ const login = async (
           latestLoginAt: newUser.latestLoginAt,
           createdAt: newUser.createdAt,
           updatedAt: newUser.updatedAt,
+          deletedAt: newUser.deletedAt,
           AuthProvider: [newAuthProvider],
         } as UserAuthType;
       });
