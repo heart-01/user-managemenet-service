@@ -9,7 +9,6 @@ import {
   JWT_SECRET,
   SENDGRID_TEMPLATE_CHANGE_PASSWORD_EMAIL,
   SENDGRID_TEMPLATE_RESET_PASSWORD_EMAIL,
-  SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
   SENDGRID_TEMPLATE_VERIFY_EMAIL,
   CLIENT_URL,
 } from '../config/dotenv';
@@ -71,20 +70,20 @@ const authValidate = async (
 const login = async (
   email: string,
   password: string,
-  device: string | undefined,
 ): Promise<ResponseCommonType<AuthResponseType | Error>> => {
   try {
     loggerService.info('localLogin');
     loggerService.debug('email', email);
     loggerService.debug('password', password);
-    loggerService.debug('device', device);
 
     // Check recent login attempts
     const recentAttempts = await userActivityLogService.checkRecentLoginAttempts(email);
     if (recentAttempts.status !== HTTP_RESPONSE_CODE.OK) {
       return {
         status: HTTP_RESPONSE_CODE.FORBIDDEN,
-        data: new ForbiddenError('Too many login attempts. Please try again later.'),
+        data: new ForbiddenError(
+          `Too many login attempts. Please try again later ${recentAttempts.data}`,
+        ),
       };
     }
 
@@ -144,14 +143,6 @@ const login = async (
         data: {
           latestLoginAt: new Date(),
         },
-      });
-
-      // Send email login device
-      await sendEmailWithTemplate({
-        to: email,
-        subject: EMAIL_SUBJECT.LoginDevice,
-        templateId: SENDGRID_TEMPLATE_LOGIN_DEVICE_EMAIL,
-        dynamicTemplateData: { device },
       });
 
       const accessToken = generateToken(

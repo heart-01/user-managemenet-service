@@ -7,7 +7,6 @@ import { authGoogleService } from '../../services/index';
 import type { AuthResponseType } from '../../types/auth.type';
 import { UserAuthType } from '../../types/users.type';
 import { generateToken } from '../../utils/token';
-import { sendEmailWithTemplate } from '../../utils/email';
 import { RecordNotFoundError, ResponseError } from '../../errors';
 
 jest.useFakeTimers().setSystemTime(new Date('2024-01-01'));
@@ -119,10 +118,9 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
       (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
       (prismaTransactionMock.userPolicy.createMany as jest.Mock).mockResolvedValue(null);
-      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token', 'Chrome browser');
+      const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -208,10 +206,9 @@ describe('Auth Google Service (Current year: 2024)', () => {
       });
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockFindUser);
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
-      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token', 'Chrome browser');
+      const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -289,10 +286,9 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (prismaTransactionMock.policy.findMany as jest.Mock).mockResolvedValue(mockPolicies);
       (prismaTransactionMock.userPolicy.upsert as jest.Mock).mockResolvedValue(mockUserPolicy);
       (prismaTransactionMock.authProvider.create as jest.Mock).mockResolvedValue(mockAuthProvider);
-      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authGoogleService.login('token', 'Chrome browser');
+      const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -306,7 +302,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
         }),
       });
 
-      const result = await authGoogleService.login('token', 'Chrome browser');
+      const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -320,7 +316,7 @@ describe('Auth Google Service (Current year: 2024)', () => {
       });
       (prisma.user.findFirst as jest.Mock).mockRejectedValue({ message: 'error' });
 
-      const result = await authGoogleService.login('token', 'Chrome browser');
+      const result = await authGoogleService.login('token');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });

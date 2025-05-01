@@ -34,3 +34,14 @@ export type UserDeletionFeedbackBodyType = {
 export type SendEmailDeleteAccountBodyType = {
   email: string;
 };
+
+export type UserDeviceSessionType = {
+  userId: string;
+  deviceId: string;
+  deviceName?: string;
+  ipAddress?: string;
+};
+
+export type UpdateUserDeviceSessionActiveBodyType = {
+  deviceId: string;
+};

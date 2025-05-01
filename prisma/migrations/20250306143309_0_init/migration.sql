@@ -8,7 +8,7 @@ CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITT
 CREATE TYPE "EMAIL_VERIFICATION_ACTION_TYPE" AS ENUM ('REGISTER', 'RESETPASSWORD', 'DELETEACCOUNT');
 
 -- CreateEnum
-CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES', 'EMAILMARKETING');
+CREATE TYPE "POLICY_TYPE" AS ENUM ('PRIVATE', 'TERMOFSERVICES', 'EMAILMARKETING', 'COOKIEPOLICY');
 
 -- CreateEnum
 CREATE TYPE "USER_ACTIVITY_LOG_ACTION_TYPE" AS ENUM ('LOGIN');
@@ -104,6 +104,19 @@ CREATE TABLE "user_deletion_feedback" (
     CONSTRAINT "user_deletion_feedback_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "user_devices_sessions" (
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "device_id" UUID NOT NULL,
+    "device_name" VARCHAR(50),
+    "ip_address" VARCHAR(50),
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "last_active_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_devices_sessions_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
@@ -115,6 +128,9 @@ CREATE UNIQUE INDEX "auth_providers_provider_user_id_key" ON "auth_providers"("p
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_policies_user_id_policy_id_key" ON "user_policies"("user_id", "policy_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_devices_sessions_user_id_device_id_key" ON "user_devices_sessions"("user_id", "device_id");
 
 -- AddForeignKey
 ALTER TABLE "auth_providers" ADD CONSTRAINT "auth_providers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -130,3 +146,6 @@ ALTER TABLE "user_policies" ADD CONSTRAINT "user_policies_policy_id_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "user_deletion_feedback" ADD CONSTRAINT "user_deletion_feedback_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "user_devices_sessions" ADD CONSTRAINT "user_devices_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

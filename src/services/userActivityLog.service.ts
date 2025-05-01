@@ -56,7 +56,7 @@ const createUserActivityLog = async (
     });
 
     return {
-      status: HTTP_RESPONSE_CODE.OK,
+      status: HTTP_RESPONSE_CODE.CREATED,
       data: result,
     };
   } catch (error) {

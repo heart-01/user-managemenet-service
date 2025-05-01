@@ -23,6 +23,7 @@ export const TIMEZONE = process.env.TIMEZONE || 'Asia/Bangkok';
 export const IPINFO_BASE_URL = process.env.IPINFO_BASE_URL || 'https://ipinfo.io';
 export const IPINFO_API_KEY = process.env.IPINFO_API_KEY || '';
 export const USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT = process.env.USER_ACTIVITY_ATTEMPT_LOGIN_LIMIT || 5;
+export const USER_LOGIN_DEVICE_SESSION_LIMIT = process.env.USER_LOGIN_DEVICE_SESSION_LIMIT || 1;
 
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';

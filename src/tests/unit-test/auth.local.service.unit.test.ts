@@ -122,10 +122,9 @@ describe('Auth Local Service (Current year: 2024)', () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       (verifyPassword as jest.Mock).mockResolvedValue(true);
       jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUser);
-      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
       (generateToken as jest.Mock).mockReturnValue('accessToken');
 
-      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('test@test.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -136,7 +135,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
 
-      const result = await authLocalService.login('test2@test.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('test2@test.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -209,7 +208,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         data: mockUserActivityLog,
       });
 
-      const result = await authLocalService.login('john@email.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('john@email.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.FORBIDDEN);
     });
 
@@ -236,7 +235,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
-      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('test@test.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
     });
 
@@ -263,7 +262,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
 
-      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('test@test.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -291,7 +290,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
       (verifyPassword as jest.Mock).mockResolvedValue(false);
 
-      const result = await authLocalService.login('test@test.com', '12345', 'Chrome browser');
+      const result = await authLocalService.login('test@test.com', '12345');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.UNAUTHORIZED);
     });
 
@@ -301,7 +300,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
         .mockResolvedValue({ status: HTTP_RESPONSE_CODE.OK, data: [] });
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue({ message: 'error' });
 
-      const result = await authLocalService.login('test@test.com', '1234', 'Chrome browser');
+      const result = await authLocalService.login('test@test.com', '1234');
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
     });
   });

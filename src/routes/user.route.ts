@@ -85,6 +85,19 @@ const userRouter: express.Router = express.Router();
  */
 
 /**
+ * User Device Session Response Type
+ * @typedef {object} UserDeviceSessionResponse
+ * @property {string} id - Device session ID
+ * @property {string} userId - User ID
+ * @property {string} deviceId - Device ID
+ * @property {string} deviceName - Device name
+ * @property {string} ipAddress - IP address
+ * @property {string} createdAt - Session creation timestamp
+ * @property {string} lastActiveAt - Last active timestamp
+ * @property {boolean} isRevoked - Session revoked status
+ */
+
+/**
  * GET /user/check-username
  * @summary Check if username is available
  * @tags users
@@ -229,6 +242,48 @@ userRouter.post(
     schema: userValidator.verifyEmail,
   }),
   userController.verifyEmail,
+);
+
+/**
+ * GET /user/{id}/session
+ * @summary Get User Device Session Active
+ * @security bearerAuth
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @return {Array<UserDeviceSessionResponse>} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+userRouter.get(
+  '/:id/session',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: userValidator.getUserDeviceSessionActive,
+  }),
+  userController.getUserDeviceSessionActive,
+);
+
+/**
+ * PATCH /user/{id}/session
+ * @summary Update User Device Session Active
+ * @security bearerAuth
+ * @tags users
+ * @param {string} id.path.required - User ID
+ * @return {Array<UserDeviceSessionResponse>} 201 - Success response - application/json
+ * @return {string} 500 - Internal Error - application/json
+ */
+userRouter.patch(
+  '/:id/session',
+  authenticateMiddleware,
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.params,
+    schema: userValidator.updateUserDeviceSessionActiveParam,
+  }),
+  validateSchemaMiddleware({
+    options: JOI_OPTIONS.body,
+    schema: userValidator.updateUserDeviceSessionActiveBody,
+  }),
+  userController.updateUserDeviceSessionActive,
 );
 
 export default userRouter;

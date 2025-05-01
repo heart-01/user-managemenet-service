@@ -59,6 +59,18 @@ const verifyEmail: Joi.ObjectSchema = Joi.object().keys({
   type: Joi.string().valid(...Object.values(EMAIL_VERIFICATION_ACTION_TYPE)),
 });
 
+const getUserDeviceSessionActive: Joi.ObjectSchema = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
+const updateUserDeviceSessionActiveParam: Joi.ObjectSchema = Joi.object().keys({
+  id: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
+const updateUserDeviceSessionActiveBody: Joi.ObjectSchema = Joi.object().keys({
+  deviceId: Joi.string().guid({ version: 'uuidv4' }).required(),
+});
+
 export default {
   getUserById,
   checkUsername,
@@ -69,4 +81,7 @@ export default {
   userDeletionFeedbackBody,
   sendEmailDeleteAccount,
   verifyEmail,
+  getUserDeviceSessionActive,
+  updateUserDeviceSessionActiveParam,
+  updateUserDeviceSessionActiveBody,
 };

@@ -2,6 +2,7 @@ import { PrismaClient, USER_STATUS, POLICY_TYPE } from '@prisma/client';
 import loggerService from '../src/services/logger.service';
 import { hashPassword } from '../src/utils/hashing';
 import {
+  initCookiePolicyContent,
   initEmailMarketingPolicyContent,
   initPrivacyPolicyContent,
   initTermsOfServicesPolicyContent,
@@ -56,6 +57,12 @@ const seed = async () => {
         id: '3c286a09-bcbd-460f-8c93-f39e6afca4da',
         type: POLICY_TYPE.EMAILMARKETING,
         content: initEmailMarketingPolicyContent,
+        version: '1.0.0',
+      },
+      {
+        id: '869930bb-003c-4c12-917e-123c7faa9b36',
+        type: POLICY_TYPE.COOKIEPOLICY,
+        content: initCookiePolicyContent,
         version: '1.0.0',
       },
     ];

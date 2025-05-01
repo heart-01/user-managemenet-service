@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
+import { UserDeviceSession } from '@prisma/client';
 import logger from '../services/logger.service';
 import {
   GoogleAuthType,
@@ -23,9 +24,12 @@ import {
   authLocalService,
   userActivityLogService,
   userService,
+  userDeviceSessionService,
 } from '../services';
 import { USER_ACTIVITY_LOG_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
+import { ResponseError } from '../errors';
+import { USER_LOGIN_DEVICE_SESSION_LIMIT } from '../config/dotenv';
 
 export const authValidate = async (request: Request, response: Response) => {
   logger.start(request);
@@ -38,24 +42,100 @@ export const authValidate = async (request: Request, response: Response) => {
 export const googleAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { idToken }: GoogleAuthType = request.body;
+  const deviceId = request.headers['x-device-id'] ? request.headers['x-device-id'] : undefined;
   const device = request.headers['user-agent'] ? request.headers['user-agent'] : undefined;
-  const result = await authGoogleService.login(idToken, device);
-  await userActivityLogService.createUserActivityLog({
+
+  // Validate the presence of deviceId
+  if (!deviceId) {
+    response
+      .status(HTTP_RESPONSE_CODE.BAD_REQUEST)
+      .send({ data: new ResponseError('Device ID is required') });
+    return;
+  }
+
+  // Login with Google
+  const googleLogin = await authGoogleService.login(idToken);
+
+  // Create log for user activity
+  const userActiveityLog = await userActivityLogService.createUserActivityLog({
     email: (jwtDecode(idToken) as { email?: string })?.email || 'unknown',
     ipAddress: request?.clientIp,
-    status: result.status,
+    status: googleLogin.status,
     userAgent: device,
     action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
-    failureReason: result.status !== HTTP_RESPONSE_CODE.OK ? String(result.data) : undefined,
+    failureReason:
+      googleLogin.status !== HTTP_RESPONSE_CODE.OK ? String(googleLogin.data) : undefined,
   });
-  if (
-    result.status === HTTP_RESPONSE_CODE.OK &&
-    (result.data as AuthResponseType).user.deletedAt !== null
-  ) {
-    const userId = (result.data as AuthResponseType).user.id;
-    await userService.recoverUser(userId);
+  if (userActiveityLog.status !== HTTP_RESPONSE_CODE.CREATED) {
+    response.status(userActiveityLog.status).send(userActiveityLog.data);
+    logger.end(request);
+    return;
   }
-  response.status(result.status).send(result.data);
+
+  if (googleLogin.status === HTTP_RESPONSE_CODE.OK) {
+    const userId = (googleLogin.data as AuthResponseType).user.id;
+
+    // Check if the user is deleted and recover if necessary.
+    if ((googleLogin.data as AuthResponseType).user.deletedAt !== null) {
+      const userRecover = await userService.recoverUser(userId);
+      if (userRecover.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(userRecover.status).send(userRecover.data);
+        logger.end(request);
+        return;
+      }
+    }
+
+    // If the number of device sessions does not exceed devices, add a new session.
+    const countUserDeviceSession = await userDeviceSessionService.countActiveSessions(userId);
+    if (countUserDeviceSession.status !== HTTP_RESPONSE_CODE.OK) {
+      response.status(countUserDeviceSession.status).send(countUserDeviceSession.data);
+      logger.end(request);
+      return;
+    }
+    const activeCountUserDeviceSession = Number(countUserDeviceSession.data);
+    if (activeCountUserDeviceSession >= Number(USER_LOGIN_DEVICE_SESSION_LIMIT)) {
+      const getDeviceId = await userDeviceSessionService.getDeviceId(userId, deviceId as string);
+      if (getDeviceId.status === HTTP_RESPONSE_CODE.NOT_FOUND) {
+        // If device session count exceeds the limit, remove the oldest session
+        const listActiveSessions = await userDeviceSessionService.listActiveSessions(userId);
+        if (listActiveSessions.status !== HTTP_RESPONSE_CODE.OK) {
+          response.status(listActiveSessions.status).send(listActiveSessions.data);
+          logger.end(request);
+          return;
+        }
+        const oldestUserDeviceSession = listActiveSessions.data as UserDeviceSession[];
+        const revokeSession = await userDeviceSessionService.revokeSession(
+          oldestUserDeviceSession[0].userId,
+          oldestUserDeviceSession[0].deviceId,
+        );
+        if (revokeSession.status !== HTTP_RESPONSE_CODE.OK) {
+          response.status(revokeSession.status).send(revokeSession.data);
+          logger.end(request);
+          return;
+        }
+      } else if (getDeviceId.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(getDeviceId.status).send(getDeviceId.data);
+        logger.end(request);
+        return;
+      }
+    }
+    const upsertUserDeviceSession = await userDeviceSessionService.upsertUserDeviceSession(
+      (googleLogin.data as AuthResponseType).user.email,
+      {
+        userId: (googleLogin.data as AuthResponseType).user.id,
+        deviceId: String(deviceId),
+        deviceName: device,
+        ipAddress: request?.clientIp,
+      },
+    );
+    if (upsertUserDeviceSession.status === HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR) {
+      response.status(upsertUserDeviceSession.status).send(upsertUserDeviceSession.data);
+      logger.end(request);
+      return;
+    }
+  }
+
+  response.status(googleLogin.status).send(googleLogin.data);
   logger.end(request);
 };
 
@@ -79,24 +159,100 @@ export const googleUnlinkAccount = async (request: Request, response: Response) 
 export const localAuth = async (request: Request, response: Response) => {
   logger.start(request);
   const { email, password }: LocalAuthType = request.body;
+  const deviceId = request.headers['x-device-id'] ? request.headers['x-device-id'] : undefined;
   const device = request.headers['user-agent'] ? request.headers['user-agent'] : undefined;
-  const result = await authLocalService.login(email.toLocaleLowerCase(), password, device);
-  await userActivityLogService.createUserActivityLog({
+
+  // Validate the presence of deviceId
+  if (!deviceId) {
+    response
+      .status(HTTP_RESPONSE_CODE.BAD_REQUEST)
+      .send({ data: new ResponseError('Device ID is required') });
+    return;
+  }
+
+  // Login with local authentication
+  const localLogin = await authLocalService.login(email.toLocaleLowerCase(), password);
+
+  // Create log for user activity
+  const userActiveityLog = await userActivityLogService.createUserActivityLog({
     email,
     ipAddress: request?.clientIp,
-    status: result.status,
+    status: localLogin.status,
     userAgent: device,
     action: USER_ACTIVITY_LOG_ACTION_TYPE.LOGIN,
-    failureReason: result.status !== HTTP_RESPONSE_CODE.OK ? String(result.data) : undefined,
+    failureReason:
+      localLogin.status !== HTTP_RESPONSE_CODE.OK ? String(localLogin.data) : undefined,
   });
-  if (
-    result.status === HTTP_RESPONSE_CODE.OK &&
-    (result.data as AuthResponseType).user.deletedAt !== null
-  ) {
-    const userId = (result.data as AuthResponseType).user.id;
-    await userService.recoverUser(userId);
+  if (userActiveityLog.status !== HTTP_RESPONSE_CODE.CREATED) {
+    response.status(userActiveityLog.status).send(userActiveityLog.data);
+    logger.end(request);
+    return;
   }
-  response.status(result.status).send(result.data);
+
+  if (localLogin.status === HTTP_RESPONSE_CODE.OK) {
+    const userId = (localLogin.data as AuthResponseType).user.id;
+
+    // Check if the user is deleted and recover if necessary.
+    if ((localLogin.data as AuthResponseType).user.deletedAt !== null) {
+      const userRecover = await userService.recoverUser(userId);
+      if (userRecover.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(userRecover.status).send(userRecover.data);
+        logger.end(request);
+        return;
+      }
+    }
+
+    // If the number of device sessions does not exceed devices, add a new session.
+    const countUserDeviceSession = await userDeviceSessionService.countActiveSessions(userId);
+    if (countUserDeviceSession.status !== HTTP_RESPONSE_CODE.OK) {
+      response.status(countUserDeviceSession.status).send(countUserDeviceSession.data);
+      logger.end(request);
+      return;
+    }
+    const activeCountUserDeviceSession = Number(countUserDeviceSession.data);
+    if (activeCountUserDeviceSession >= Number(USER_LOGIN_DEVICE_SESSION_LIMIT)) {
+      const getDeviceId = await userDeviceSessionService.getDeviceId(userId, deviceId as string);
+      if (getDeviceId.status === HTTP_RESPONSE_CODE.NOT_FOUND) {
+        // If device session count exceeds the limit, remove the oldest session
+        const listActiveSessions = await userDeviceSessionService.listActiveSessions(userId);
+        if (listActiveSessions.status !== HTTP_RESPONSE_CODE.OK) {
+          response.status(listActiveSessions.status).send(listActiveSessions.data);
+          logger.end(request);
+          return;
+        }
+        const oldestUserDeviceSession = listActiveSessions.data as UserDeviceSession[];
+        const revokeSession = await userDeviceSessionService.revokeSession(
+          oldestUserDeviceSession[0].userId,
+          oldestUserDeviceSession[0].deviceId,
+        );
+        if (revokeSession.status !== HTTP_RESPONSE_CODE.OK) {
+          response.status(revokeSession.status).send(revokeSession.data);
+          logger.end(request);
+          return;
+        }
+      } else if (getDeviceId.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(getDeviceId.status).send(getDeviceId.data);
+        logger.end(request);
+        return;
+      }
+    }
+    const upsertUserDeviceSession = await userDeviceSessionService.upsertUserDeviceSession(
+      (localLogin.data as AuthResponseType).user.email,
+      {
+        userId: (localLogin.data as AuthResponseType).user.id,
+        deviceId: String(deviceId),
+        deviceName: device,
+        ipAddress: request?.clientIp,
+      },
+    );
+    if (upsertUserDeviceSession.status === HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR) {
+      response.status(upsertUserDeviceSession.status).send(upsertUserDeviceSession.data);
+      logger.end(request);
+      return;
+    }
+  }
+
+  response.status(localLogin.status).send(localLogin.data);
   logger.end(request);
 };
 

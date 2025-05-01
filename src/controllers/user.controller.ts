@@ -1,11 +1,12 @@
 import type { Request, Response } from 'express';
-import { authLocalService, userService } from '../services';
+import { authLocalService, userDeviceSessionService, userService } from '../services';
 import logger from '../services/logger.service';
 import type {
   CheckUsernameQueryType,
   GetUserParamType,
   SendEmailDeleteAccountBodyType,
   UpdateUserBodyType,
+  UpdateUserDeviceSessionActiveBodyType,
   UpdateUserParamType,
   UserDeletionFeedbackBodyType,
 } from '../types/users.type';
@@ -84,6 +85,23 @@ export const verifyEmail = async (request: Request, response: Response) => {
   logger.end(request);
 };
 
+export const getUserDeviceSessionActive = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { id: userId } = request.params as GetUserParamType;
+  const result = await userDeviceSessionService.listActiveSessions(userId);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
+export const updateUserDeviceSessionActive = async (request: Request, response: Response) => {
+  logger.start(request);
+  const { id: userId } = request.params as GetUserParamType;
+  const { deviceId } = request.body as UpdateUserDeviceSessionActiveBodyType;
+  const result = await userDeviceSessionService.updateUserDeviceSessionActive(userId, deviceId);
+  response.status(result.status).send(result.data);
+  logger.end(request);
+};
+
 export default {
   getUserById,
   checkUsername,
@@ -92,4 +110,6 @@ export default {
   userDeletionFeedback,
   sendEmailDeleteAccount,
   verifyEmail,
+  getUserDeviceSessionActive,
+  updateUserDeviceSessionActive,
 };
