@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { jwtDecode } from 'jwt-decode';
-import { UserDeviceSession } from '@prisma/client';
 import logger from '../services/logger.service';
 import {
   GoogleAuthType,
@@ -94,27 +93,10 @@ export const googleAuth = async (request: Request, response: Response) => {
     }
     const activeCountUserDeviceSession = Number(countUserDeviceSession.data);
     if (activeCountUserDeviceSession >= Number(USER_LOGIN_DEVICE_SESSION_LIMIT)) {
-      const getDeviceId = await userDeviceSessionService.getDeviceId(userId, deviceId as string);
-      if (getDeviceId.status === HTTP_RESPONSE_CODE.NOT_FOUND) {
-        // If device session count exceeds the limit, remove the oldest session
-        const listActiveSessions = await userDeviceSessionService.listActiveSessions(userId);
-        if (listActiveSessions.status !== HTTP_RESPONSE_CODE.OK) {
-          response.status(listActiveSessions.status).send(listActiveSessions.data);
-          logger.end(request);
-          return;
-        }
-        const oldestUserDeviceSession = listActiveSessions.data as UserDeviceSession[];
-        const revokeSession = await userDeviceSessionService.revokeSession(
-          oldestUserDeviceSession[0].userId,
-          oldestUserDeviceSession[0].deviceId,
-        );
-        if (revokeSession.status !== HTTP_RESPONSE_CODE.OK) {
-          response.status(revokeSession.status).send(revokeSession.data);
-          logger.end(request);
-          return;
-        }
-      } else if (getDeviceId.status !== HTTP_RESPONSE_CODE.OK) {
-        response.status(getDeviceId.status).send(getDeviceId.data);
+      const pruneOldestSessionIfExceededRes =
+        await userDeviceSessionService.pruneOldestSessionIfExceeded(userId, String(deviceId));
+      if (pruneOldestSessionIfExceededRes.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(pruneOldestSessionIfExceededRes.status).send(pruneOldestSessionIfExceededRes.data);
         logger.end(request);
         return;
       }
@@ -211,27 +193,10 @@ export const localAuth = async (request: Request, response: Response) => {
     }
     const activeCountUserDeviceSession = Number(countUserDeviceSession.data);
     if (activeCountUserDeviceSession >= Number(USER_LOGIN_DEVICE_SESSION_LIMIT)) {
-      const getDeviceId = await userDeviceSessionService.getDeviceId(userId, deviceId as string);
-      if (getDeviceId.status === HTTP_RESPONSE_CODE.NOT_FOUND) {
-        // If device session count exceeds the limit, remove the oldest session
-        const listActiveSessions = await userDeviceSessionService.listActiveSessions(userId);
-        if (listActiveSessions.status !== HTTP_RESPONSE_CODE.OK) {
-          response.status(listActiveSessions.status).send(listActiveSessions.data);
-          logger.end(request);
-          return;
-        }
-        const oldestUserDeviceSession = listActiveSessions.data as UserDeviceSession[];
-        const revokeSession = await userDeviceSessionService.revokeSession(
-          oldestUserDeviceSession[0].userId,
-          oldestUserDeviceSession[0].deviceId,
-        );
-        if (revokeSession.status !== HTTP_RESPONSE_CODE.OK) {
-          response.status(revokeSession.status).send(revokeSession.data);
-          logger.end(request);
-          return;
-        }
-      } else if (getDeviceId.status !== HTTP_RESPONSE_CODE.OK) {
-        response.status(getDeviceId.status).send(getDeviceId.data);
+      const pruneOldestSessionIfExceededRes =
+        await userDeviceSessionService.pruneOldestSessionIfExceeded(userId, String(deviceId));
+      if (pruneOldestSessionIfExceededRes.status !== HTTP_RESPONSE_CODE.OK) {
+        response.status(pruneOldestSessionIfExceededRes.status).send(pruneOldestSessionIfExceededRes.data);
         logger.end(request);
         return;
       }

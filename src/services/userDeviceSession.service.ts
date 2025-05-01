@@ -224,6 +224,51 @@ const updateUserDeviceSessionActive = async (
   }
 };
 
+const pruneOldestSessionIfExceeded = async (
+  userId: string,
+  deviceId: string,
+): Promise<ResponseCommonType<UserDeviceSession[] | UserDeviceSession | Error>> => {
+  try {
+    const getDeviceIdRes = await getDeviceId(userId, deviceId as string);
+    if (getDeviceIdRes.status === HTTP_RESPONSE_CODE.NOT_FOUND) {
+      // If device session count exceeds the limit, remove the oldest session
+      const listActiveSessionsRes = await listActiveSessions(userId);
+      if (listActiveSessionsRes.status !== HTTP_RESPONSE_CODE.OK) {
+        return {
+          status: HTTP_RESPONSE_CODE.CONFLICT,
+          data: listActiveSessionsRes.data,
+        };
+      }
+      const oldestUserDeviceSession = listActiveSessionsRes.data as UserDeviceSession[];
+      const revokeSessionRes = await revokeSession(
+        oldestUserDeviceSession[0].userId,
+        oldestUserDeviceSession[0].deviceId,
+      );
+      if (revokeSessionRes.status !== HTTP_RESPONSE_CODE.OK) {
+        return {
+          status: HTTP_RESPONSE_CODE.CONFLICT,
+          data: revokeSessionRes.data,
+        };
+      }
+    } else if (getDeviceIdRes.status !== HTTP_RESPONSE_CODE.OK) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: getDeviceIdRes.data,
+      };
+    }
+    return {
+      status: HTTP_RESPONSE_CODE.OK,
+      data: getDeviceIdRes.data,
+    };
+  } catch (error) {
+    loggerService.error(error);
+    return {
+      status: HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR,
+      data: error as Error,
+    };
+  }
+};
+
 export default {
   upsertUserDeviceSession,
   countActiveSessions,
@@ -231,4 +276,5 @@ export default {
   getDeviceId,
   revokeSession,
   updateUserDeviceSessionActive,
+  pruneOldestSessionIfExceeded,
 };

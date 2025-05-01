@@ -4,10 +4,6 @@ import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
 import { RecordNotFoundError, ResponseError } from '../../errors';
 import userDeviceSessionService from '../../services/userDeviceSession.service';
 
-jest.mock('../../utils/email', () => ({
-  sendEmailWithTemplate: jest.fn(),
-}));
-
 describe('User Device Session Service (Current year: 2025)', () => {
   afterEach(() => {
     jest.clearAllMocks();
