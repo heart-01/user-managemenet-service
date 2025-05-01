@@ -3,6 +3,11 @@ import { prisma } from '../../config/database';
 import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
 import { RecordNotFoundError, ResponseError } from '../../errors';
 import userDeviceSessionService from '../../services/userDeviceSession.service';
+import { sendEmailWithTemplate } from '../../utils/email';
+
+jest.mock('../../utils/email', () => ({
+  sendEmailWithTemplate: jest.fn(),
+}));
 
 describe('User Device Session Service (Current year: 2025)', () => {
   afterEach(() => {
@@ -45,6 +50,7 @@ describe('User Device Session Service (Current year: 2025)', () => {
       jest
         .spyOn(prisma.userDeviceSession, 'update')
         .mockResolvedValue(mockUserDeviceSessionUpdated);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
 
       const result = await userDeviceSessionService.upsertUserDeviceSession(email, {
         userId: '11111111-1111-1111-1111-111111111111',
@@ -79,6 +85,7 @@ describe('User Device Session Service (Current year: 2025)', () => {
 
       jest.spyOn(prisma.userDeviceSession, 'findFirst').mockResolvedValue(null);
       jest.spyOn(prisma.userDeviceSession, 'create').mockResolvedValue(mockUserDeviceSession);
+      (sendEmailWithTemplate as jest.Mock).mockResolvedValue(null);
 
       const result = await userDeviceSessionService.upsertUserDeviceSession(email, {
         userId: '11111111-1111-1111-1111-111111111111',
