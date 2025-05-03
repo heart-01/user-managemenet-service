@@ -16,7 +16,7 @@ CREATE TYPE "USER_ACTIVITY_LOG_ACTION_TYPE" AS ENUM ('LOGIN');
 -- CreateTable
 CREATE TABLE "users" (
     "id" UUID NOT NULL,
-    "name" VARCHAR(50),
+    "name" VARCHAR(70),
     "phone_number" VARCHAR(20),
     "bio" TEXT,
     "username" VARCHAR(50),

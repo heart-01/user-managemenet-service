@@ -25,7 +25,7 @@ const updateUserParam: Joi.ObjectSchema = Joi.object().keys({
 
 const updateUserBody: Joi.ObjectSchema = Joi.object().keys({
   bio: Joi.string().optional().allow(null, ''),
-  name: Joi.string().max(50).optional().allow(null, ''),
+  name: Joi.string().max(70).optional().allow(null, ''),
   password: Joi.string()
     .optional()
     .min(PASSWORD_VALIDATE.MIN)
