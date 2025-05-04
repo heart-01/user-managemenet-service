@@ -60,6 +60,7 @@ export type PayloadAccessTokenType = {
 export type PayloadTokenVerifyEmailType = {
   id: string;
   token: string;
+  email?: string;
 };
 
 export type AuthValidateResponseType = {

@@ -230,7 +230,11 @@ const sendEmailRegister = async (
       // Case email verification is expired or token is completed
       if (isEmailExpired || isTokenCompleted) {
         const token = uuidv4();
-        const payload: PayloadTokenVerifyEmailType = { id: emailVerification.userId, token };
+        const payload: PayloadTokenVerifyEmailType = {
+          id: emailVerification.userId,
+          token,
+          email,
+        };
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         const newEmailVerification = await prisma.emailVerification.create({
           data: {
@@ -259,6 +263,7 @@ const sendEmailRegister = async (
         const payload: PayloadTokenVerifyEmailType = {
           id: emailVerification.userId,
           token: emailVerification.token,
+          email,
         };
         const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
         await sendEmailWithTemplate({
@@ -281,7 +286,7 @@ const sendEmailRegister = async (
       data: { email, status: USER_STATUS.PENDING },
     });
     const token = uuidv4();
-    const payload: PayloadTokenVerifyEmailType = { id: newUser.id, token };
+    const payload: PayloadTokenVerifyEmailType = { id: newUser.id, token, email };
     const accessToken = generateToken(payload, JWT_SECRET, tokenExpiresIn);
     const newEmailVerification = await prisma.emailVerification.create({
       data: {
@@ -351,7 +356,11 @@ const verifyEmail = async (
 
     return {
       status: HTTP_RESPONSE_CODE.CREATED,
-      data: { token, userId: decoded.id },
+      data: {
+        token,
+        userId: decoded.id,
+        ...(decoded.email !== undefined && { email: decoded.email }),
+      },
     };
   } catch (error) {
     const err = error as Error;
