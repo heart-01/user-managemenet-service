@@ -22,8 +22,8 @@ export const getUserById = async (request: Request, response: Response) => {
 
 export const checkUsername = async (request: Request, response: Response) => {
   logger.start(request);
-  const { username } = request.query as CheckUsernameQueryType;
-  const result = await userService.checkUsername(username);
+  const { userId, username } = request.query as CheckUsernameQueryType;
+  const result = await userService.checkUsername(userId, username);
   response.status(result.status).send(result.data);
   logger.end(request);
 };

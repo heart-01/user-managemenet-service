@@ -45,24 +45,25 @@ enum USER_ACTIVITY_LOG_ACTION_TYPE {
 }
 
 model User {
-  id                   String                 @id @default(uuid()) @db.Uuid
-  name                 String?                @map("name") @db.VarChar(70)
-  phoneNumber          String?                @map("phone_number") @db.VarChar(20)
-  bio                  String?                @map("bio") @db.Text
-  username             String?                @unique @map("username") @db.VarChar(50)
-  password             String?                @map("password") @db.VarChar(60)
-  email                String                 @unique @map("email") @db.VarChar(50)
-  imageUrl             String?                @map("imageUrl") @db.VarChar(255)
-  status               USER_STATUS            @map("status")
-  latestLoginAt        DateTime               @default(now()) @map("latest_login_at") @db.Timestamptz(3)
-  createdAt            DateTime               @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt            DateTime               @default(now()) @map("updated_at") @db.Timestamptz(3)
-  deletedAt            DateTime?              @map("deleted_at") @db.Timestamptz(3)
-  AuthProvider         AuthProvider[]
-  EmailVerification    EmailVerification[]
-  UserPolicy           UserPolicy[]
-  UserDeletionFeedback UserDeletionFeedback[]
-  UserDeviceSession    UserDeviceSession[]
+  id                    String                  @id @default(uuid()) @db.Uuid
+  name                  String?                 @map("name") @db.VarChar(70)
+  phoneNumber           String?                 @map("phone_number") @db.VarChar(20)
+  bio                   String?                 @map("bio") @db.Text
+  username              String?                 @unique @map("username") @db.VarChar(50)
+  password              String?                 @map("password") @db.VarChar(60)
+  email                 String                  @unique @map("email") @db.VarChar(50)
+  imageUrl              String?                 @map("imageUrl") @db.VarChar(255)
+  status                USER_STATUS             @map("status")
+  latestLoginAt         DateTime                @default(now()) @map("latest_login_at") @db.Timestamptz(3)
+  createdAt             DateTime                @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt             DateTime                @default(now()) @map("updated_at") @db.Timestamptz(3)
+  deletedAt             DateTime?               @map("deleted_at") @db.Timestamptz(3)
+  AuthProvider          AuthProvider[]
+  EmailVerification     EmailVerification[]
+  UserPolicy            UserPolicy[]
+  UserDeletionFeedback  UserDeletionFeedback[]
+  UserDeviceSession     UserDeviceSession[]
+  UsernameChangeHistory UsernameChangeHistory[]
 
   @@map("users")
 }
@@ -157,4 +158,24 @@ model UserDeviceSession {
 
   @@unique([userId, deviceId])
   @@map("user_devices_sessions")
+}
+
+model UsernameChangeHistory {
+  id               String  @id @default(uuid()) @db.Uuid
+  userId           String  @map("user_id") @db.Uuid
+  previousUsername String? @map("previous_username") @db.VarChar(50)
+  updatedUsername  String  @map("updated_username") @db.VarChar(50)
+  changedAt DateTime @default(now()) @map("changed_at") @db.Timestamptz(3)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("username_change_histories")
+}
+
+model ForbiddenUsername {
+  id        String   @id @default(uuid()) @db.Uuid
+  username  String   @unique @map("username") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@map("forbidden_usernames")
 }

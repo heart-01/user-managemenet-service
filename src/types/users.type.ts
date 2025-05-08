@@ -5,6 +5,7 @@ export type GetUserParamType = {
 };
 
 export type CheckUsernameQueryType = {
+  userId: string;
   username: string;
 };
 

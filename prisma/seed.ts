@@ -7,6 +7,7 @@ import {
   initPrivacyPolicyContent,
   initTermsOfServicesPolicyContent,
 } from './policyContent';
+import { forbiddenUsernameData } from './forbiddenUsername';
 
 const prisma = new PrismaClient();
 
@@ -108,7 +109,22 @@ const seed = async () => {
       }),
     );
 
-    await prisma.$transaction([...userProcesses, ...policyProcesses, ...userPolicyProcesses]);
+    const forbiddenUsernameProcesses = forbiddenUsernameData.map((forbiddenUsername) =>
+      prisma.forbiddenUsername.upsert({
+        where: {
+          id: forbiddenUsername.id,
+        },
+        update: forbiddenUsername,
+        create: forbiddenUsername,
+      }),
+    );
+
+    await prisma.$transaction([
+      ...userProcesses,
+      ...policyProcesses,
+      ...userPolicyProcesses,
+      ...forbiddenUsernameProcesses,
+    ]);
   } catch (error: any) {
     loggerService.error(error);
   } finally {

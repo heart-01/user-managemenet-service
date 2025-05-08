@@ -66,22 +66,35 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
 };
 
 export const checkUsername = async (
+  userId: string,
   username: string,
-): Promise<ResponseCommonType<boolean | Error>> => {
+): Promise<ResponseCommonType<{ isValid: boolean; changeCount: number } | Error>> => {
   try {
     loggerService.info('checkUsername');
+    loggerService.debug('userId', userId);
     loggerService.debug('username', username);
 
-    const result = await prisma.user.findUnique({
+    // Check username already exists
+    const result = await prisma.user.findUnique({ where: { username }, select: { id: true } });
+
+    // Check username forbidden
+    const forbiddenUsername = await prisma.forbiddenUsername.findUnique({
       where: { username },
-      select: {
-        id: true,
-      },
+      select: { id: true },
+    });
+
+    // Check the number of username changes
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const changeCount = await prisma.usernameChangeHistory.count({
+      where: { userId, changedAt: { gte: sevenDaysAgo } },
     });
 
     return {
       status: HTTP_RESPONSE_CODE.OK,
-      data: Boolean(result),
+      data: {
+        isValid: Boolean(result || forbiddenUsername),
+        changeCount,
+      },
     };
   } catch (error) {
     return {
@@ -110,11 +123,36 @@ export const updateUser = async (
     }
 
     // Validate username
-    if (username && username === user.username) {
-      return {
-        status: HTTP_RESPONSE_CODE.CONFLICT,
-        data: new ConflictError('Username already exists'),
-      };
+    if (username && username !== user?.username) {
+      // Check the number of username changes
+      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const changeCount = await prisma.usernameChangeHistory.count({
+        where: { userId: id, changedAt: { gte: sevenDaysAgo } },
+      });
+      if (changeCount >= 5) {
+        return {
+          status: HTTP_RESPONSE_CODE.LIMIT_USERNAME_CHANGE,
+          data: new ConflictError('You can only change your username 5 times in 7 days'),
+        };
+      }
+      // Check username already exists
+      const usernameExist = await prisma.user.findUnique({ where: { username } });
+      if (usernameExist) {
+        return {
+          status: HTTP_RESPONSE_CODE.CONFLICT,
+          data: new ConflictError('Username already exists'),
+        };
+      }
+      // Check username forbidden
+      const forbiddenUsername = await prisma.forbiddenUsername.findUnique({
+        where: { username },
+      });
+      if (forbiddenUsername) {
+        return {
+          status: HTTP_RESPONSE_CODE.CONFLICT,
+          data: new ConflictError('Username is forbidden'),
+        };
+      }
     }
 
     // Validate password
@@ -154,6 +192,16 @@ export const updateUser = async (
         updatedAt: true,
       },
     });
+
+    if (username && username !== user.username) {
+      await prisma.usernameChangeHistory.create({
+        data: {
+          userId: result.id,
+          previousUsername: user.username,
+          updatedUsername: username,
+        },
+      });
+    }
 
     return {
       status: HTTP_RESPONSE_CODE.OK,

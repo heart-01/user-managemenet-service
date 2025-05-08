@@ -394,6 +394,17 @@ const register = async (
       };
     }
 
+    // Check username forbidden
+    const forbiddenUsername = await prisma.forbiddenUsername.findUnique({
+      where: { username: user.username },
+    });
+    if (forbiddenUsername) {
+      return {
+        status: HTTP_RESPONSE_CODE.CONFLICT,
+        data: new ConflictError('Username is forbidden'),
+      };
+    }
+
     // Prepare data fro update user and user policy
     const hashedPassword = await hashPassword(user.password);
     const userPolicyData: Prisma.UserPolicyCreateManyInput[] = user.userPolicy.map((policyId) => ({

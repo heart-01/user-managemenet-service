@@ -98,12 +98,19 @@ const userRouter: express.Router = express.Router();
  */
 
 /**
+ * Check Username Response Type
+ * @typedef {object} CheckUsernameResponse
+ * @property {boolean} isValid - Indicates if the username is valid
+ * @property {string} changeCount - Number of changes made
+ */
+
+/**
  * GET /user/check-username
  * @summary Check if username is available
  * @tags users
+ * @param {string} userId.query.required - User ID
  * @param {string} username.query.required - Username
- * @return {boolean} 200 - Username is available - application/json
- * @return {boolean} 200 - Username is not available - application/json
+ * @return {CheckUsernameResponse} 200 - Success response - application/json
  * @return {string} 500 - Internal server error - application/json
  */
 userRouter.get(

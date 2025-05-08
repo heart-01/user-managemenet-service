@@ -8,7 +8,10 @@ export const getPolicy = async (): Promise<ResponseCommonType<Policy[] | Error>>
   try {
     loggerService.info('getPolicy');
 
-    const results: Policy[] | null = await prisma.policy.findMany();
+    const results: Policy[] | null = await prisma.policy.findMany({
+      orderBy: { version: 'desc' },
+      distinct: ['type'],
+    });
 
     if (results.length === 0) {
       return {

@@ -7,7 +7,7 @@ import { googleClient } from '../config/googleAuth';
 import { ACCESS_TOKEN_EXPIRES_IN, GOOGLE_CLIENT_ID, JWT_SECRET } from '../config/dotenv';
 import { prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
-import { USER_STATUS, AUTH_PROVIDER_NAME } from '../enums/prisma.enum';
+import { USER_STATUS, AUTH_PROVIDER_NAME, POLICY_TYPE } from '../enums/prisma.enum';
 import { UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType, PayloadAccessTokenType } from '../types/auth.type';
@@ -159,7 +159,15 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
           },
         });
         // Create user policy
-        const policies = await prismaTransaction.policy.findMany();
+        const policies = await prismaTransaction.policy.findMany({
+          where: {
+            type: {
+              in: [POLICY_TYPE.EMAILMARKETING, POLICY_TYPE.TERMOFSERVICES, POLICY_TYPE.PRIVATE],
+            },
+          },
+          orderBy: { version: 'desc' },
+          distinct: ['type'],
+        });
         for (let i = 0; i < policies?.length; i += 1) {
           await prismaTransaction.userPolicy.upsert({
             where: { userId_policyId: { userId: user.id, policyId: policies[i].id } },
@@ -244,7 +252,15 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         });
 
         // Create user policy
-        const policies = await prismaTransaction.policy.findMany();
+        const policies = await prismaTransaction.policy.findMany({
+          where: {
+            type: {
+              in: [POLICY_TYPE.EMAILMARKETING, POLICY_TYPE.TERMOFSERVICES, POLICY_TYPE.PRIVATE],
+            },
+          },
+          orderBy: { version: 'desc' },
+          distinct: ['type'],
+        });
         const createUserPolices = policies.map((policy) => ({
           userId: newUser.id,
           policyId: policy.id,

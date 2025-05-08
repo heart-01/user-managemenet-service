@@ -1,4 +1,10 @@
-import type { EmailVerification, User, UserDeletionFeedback } from '@prisma/client';
+import type {
+  EmailVerification,
+  ForbiddenUsername,
+  User,
+  UserDeletionFeedback,
+  UsernameChangeHistory,
+} from '@prisma/client';
 import { EMAIL_VERIFICATION_ACTION_TYPE, USER_STATUS } from '../../enums/prisma.enum';
 import { prisma } from '../../config/database';
 import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
@@ -93,6 +99,7 @@ describe('User Service (Current year: 2024)', () => {
       jest.clearAllMocks();
     });
     it('should return true when username exists', async () => {
+      const userId = '11111111-1111-1111-1111-111111111113';
       const username = 'existingUser';
       const mockUser: User = {
         id: '11111111-1111-1111-1111-111111111111',
@@ -109,21 +116,67 @@ describe('User Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
         deletedAt: null,
       };
-      const expected = true;
+      const expected = {
+        isValid: true,
+        changeCount: 0,
+      };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.usernameChangeHistory, 'count').mockResolvedValue(0);
 
-      const result = await userService.checkUsername(username);
+      const result = await userService.checkUsername(username, userId);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
+      expect(result.data).toStrictEqual(expected);
+    });
+    it('should return true when username forbidden', async () => {
+      const userId = '11111111-1111-1111-1111-111111111113';
+      const username = 'admin';
+      const mockUser: User = {
+        id: '11111111-1111-1111-1111-111111111111',
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'existingUser',
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: null,
+      };
+      const mockUserForbidden: ForbiddenUsername = {
+        id: '11111111-1111-1111-1111-111111111112',
+        username: 'admin',
+        createdAt: new Date(),
+      };
+      const expected = {
+        isValid: true,
+        changeCount: 0,
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(mockUserForbidden);
+      jest.spyOn(prisma.usernameChangeHistory, 'count').mockResolvedValue(0);
+
+      const result = await userService.checkUsername(username, userId);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
 
     it('should return false when username does not exist', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
 
+      const userId = '11111111-1111-1111-1111-111111111113';
       const username = 'noExistingUser';
-      const expected = false;
-      const result = await userService.checkUsername(username);
+      const expected = {
+        isValid: false,
+        changeCount: 0,
+      };
+      const result = await userService.checkUsername(username, userId);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
@@ -131,8 +184,9 @@ describe('User Service (Current year: 2024)', () => {
     it('should return error 500 when database connection has problem', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockRejectedValue(null);
 
+      const userId = '11111111-1111-1111-1111-111111111113';
       const username = 'existingUser';
-      const result = await userService.checkUsername(username);
+      const result = await userService.checkUsername(username, userId);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
       expect(result.data).toStrictEqual(null);
     });
@@ -180,6 +234,13 @@ describe('User Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
         deletedAt: null,
       };
+      const mockUsernameChangeHistory: UsernameChangeHistory = {
+        id: '22222222-2222-2222-2222-222222222222',
+        userId,
+        previousUsername: null,
+        updatedUsername: 'test',
+        changedAt: new Date(),
+      };
       const expected = {
         id: userId,
         name: 'test2',
@@ -196,16 +257,24 @@ describe('User Service (Current year: 2024)', () => {
         deletedAt: null,
       };
 
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      jest
+        .spyOn(prisma.user, 'findUnique')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.usernameChangeHistory, 'count').mockResolvedValue(0);
       (verifyPassword as jest.Mock).mockResolvedValue(false);
       (hashPassword as jest.Mock).mockResolvedValue('****');
       jest.spyOn(prisma.user, 'update').mockResolvedValue(mockUpdatedUser);
+      jest
+        .spyOn(prisma.usernameChangeHistory, 'create')
+        .mockResolvedValue(mockUsernameChangeHistory);
 
       const result = await userService.updateUser(userId, data);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.OK);
       expect(result.data).toStrictEqual(expected);
     });
-    it('should return error 404 when data not found', async () => {
+    it('should return error 409 when username already exists', async () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
@@ -222,15 +291,98 @@ describe('User Service (Current year: 2024)', () => {
         latestLoginAt: new Date(),
         deletedAt: null,
       };
-      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(mockUser);
+      const mockUserAlreadyExists: User = {
+        id: '11111111-1111-1111-1111-111111111112',
+        name: 'test2',
+        bio: null,
+        email: 'test2@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'test2',
+        password: 'test2',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: null,
+      };
+      jest
+        .spyOn(prisma.user, 'findUnique')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(mockUserAlreadyExists);
 
       const data: UpdateUserBodyType = {
-        username: 'test',
+        username: 'test2',
       };
       const result = await userService.updateUser(userId, data);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
     });
-    it('should return error 409 when username already exists', async () => {
+    it('should return error 409 when username forbidden', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'test',
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: null,
+      };
+      const mockForbiddenUsername: ForbiddenUsername = {
+        id: '11111111-1111-1111-1111-111111111112',
+        username: 'admin',
+        createdAt: new Date(),
+      };
+      jest
+        .spyOn(prisma.user, 'findUnique')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(mockForbiddenUsername);
+
+      const data: UpdateUserBodyType = {
+        username: 'admin',
+      };
+      const result = await userService.updateUser(userId, data);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
+    });
+    it('should return error 440 when the number of username changes is greater than or equal to 5', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockUser: User = {
+        id: userId,
+        name: 'test',
+        bio: null,
+        email: 'test@test.com',
+        imageUrl: null,
+        phoneNumber: null,
+        status: USER_STATUS.ACTIVATED,
+        username: 'test',
+        password: 'test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        latestLoginAt: new Date(),
+        deletedAt: null,
+      };
+
+      jest
+        .spyOn(prisma.user, 'findUnique')
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.usernameChangeHistory, 'count').mockResolvedValue(5);
+
+      const data: UpdateUserBodyType = {
+        username: 'hello',
+      };
+      const result = await userService.updateUser(userId, data);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.LIMIT_USERNAME_CHANGE);
+    });
+    it('should return error 409 when data not found', async () => {
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
 
       const userId = '21111111-1111-1111-1111-111111111111';

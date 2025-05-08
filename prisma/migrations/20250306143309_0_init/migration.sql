@@ -117,6 +117,26 @@ CREATE TABLE "user_devices_sessions" (
     CONSTRAINT "user_devices_sessions_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "username_change_histories" (
+    "id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "previous_username" VARCHAR(50),
+    "updated_username" VARCHAR(50) NOT NULL,
+    "changed_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "username_change_histories_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "forbidden_usernames" (
+    "id" UUID NOT NULL,
+    "username" VARCHAR(50) NOT NULL,
+    "created_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "forbidden_usernames_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_username_key" ON "users"("username");
 
@@ -131,6 +151,9 @@ CREATE UNIQUE INDEX "user_policies_user_id_policy_id_key" ON "user_policies"("us
 
 -- CreateIndex
 CREATE UNIQUE INDEX "user_devices_sessions_user_id_device_id_key" ON "user_devices_sessions"("user_id", "device_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "forbidden_usernames_username_key" ON "forbidden_usernames"("username");
 
 -- AddForeignKey
 ALTER TABLE "auth_providers" ADD CONSTRAINT "auth_providers_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
@@ -149,3 +172,6 @@ ALTER TABLE "user_deletion_feedback" ADD CONSTRAINT "user_deletion_feedback_user
 
 -- AddForeignKey
 ALTER TABLE "user_devices_sessions" ADD CONSTRAINT "user_devices_sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "username_change_histories" ADD CONSTRAINT "username_change_histories_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

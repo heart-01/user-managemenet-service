@@ -1,9 +1,9 @@
 export enum EMAIL_SUBJECT {
-  Register = 'Investnity - Verify your email address',
-  ResetPassword = 'Invesnity - Request to reset your password',
-  ChangePassword = 'Investnity - Password changed',
-  LoginDevice = 'Investnity - Sign in from new device',
-  DeleteAccount = 'Investnity - Request to delete your account',
-  DeleteAccountSuccess = 'Investnity - Account deletion successful',
-  RestoreAccountSuccess = 'Investnity - Account reactivation successful',
+  Register = 'Verify your email address',
+  ResetPassword = 'Request to reset your password',
+  ChangePassword = 'Password changed',
+  LoginDevice = 'Sign in from new device',
+  DeleteAccount = 'Request to delete your account',
+  DeleteAccountSuccess = 'Account deletion successful',
+  RestoreAccountSuccess = 'Account reactivation successful',
 }

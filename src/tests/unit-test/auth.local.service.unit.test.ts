@@ -1,5 +1,5 @@
 import { verify } from 'jsonwebtoken';
-import type { EmailVerification, User, UserActivityLog } from '@prisma/client';
+import type { EmailVerification, ForbiddenUsername, User, UserActivityLog } from '@prisma/client';
 import { prisma, Prisma } from '../../config/database';
 import * as database from '../../config/database';
 import { authLocalService, userActivityLogService } from '../../services/index';
@@ -685,6 +685,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       };
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
       (hashPassword as jest.Mock).mockResolvedValue('****');
       (prismaTransactionMock.user.update as jest.Mock).mockResolvedValue(mockUpdatedUser);
       (prismaTransactionMock.userPolicy.createMany as jest.Mock).mockResolvedValue(null);
@@ -749,6 +750,29 @@ describe('Auth Local Service (Current year: 2024)', () => {
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
     });
 
+    it('should return error 409 when username forbidden', async () => {
+      const userId = '11111111-1111-1111-1111-111111111111';
+      const mockForbiddenUsername: ForbiddenUsername = {
+        id: '11111111-1111-1111-1111-111111111112',
+        username: 'admin',
+        createdAt: new Date(),
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(mockForbiddenUsername);
+
+      const user: RegisterType = {
+        userId,
+        username: 'test',
+        password: '1234',
+        confirmPassword: '1234',
+        name: 'test',
+        userPolicy: ['31111111-1111-1111-1111-111111111111'],
+      };
+      const result = await authLocalService.register(user);
+      expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.CONFLICT);
+    });
+
     it('should return error 409 when updating user but username is not exist', async () => {
       const userId = '21111111-1111-1111-1111-111111111111';
       const mockErrorPrismaUpdate = new Prisma.PrismaClientKnownRequestError('error', {
@@ -757,6 +781,7 @@ describe('Auth Local Service (Current year: 2024)', () => {
       });
 
       jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+      jest.spyOn(prisma.forbiddenUsername, 'findUnique').mockResolvedValue(null);
       (hashPassword as jest.Mock).mockResolvedValue('****');
       (prismaTransactionMock.user.update as jest.Mock).mockRejectedValue(mockErrorPrismaUpdate);
 

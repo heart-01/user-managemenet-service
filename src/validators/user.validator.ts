@@ -12,6 +12,7 @@ const getUserById: Joi.ObjectSchema = Joi.object().keys({
 });
 
 const checkUsername: Joi.ObjectSchema = Joi.object().keys({
+  userId: Joi.string().guid({ version: 'uuidv4' }).required(),
   username: Joi.string()
     .required()
     .min(USERNAME_VALIDATE.MIN)
