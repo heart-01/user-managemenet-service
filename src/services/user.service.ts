@@ -7,6 +7,7 @@ import {
   SENDGRID_TEMPLATE_DELETE_ACCOUNT_EMAIL,
   SENDGRID_TEMPLATE_DELETE_ACCOUNT_SUCCESS_EMAIL,
   SENDGRID_TEMPLATE_RESTORE_ACCOUNT_SUCCESS_EMAIL,
+  USERNAME_CHANGE_LIMIT_DAYS,
 } from '../config/dotenv';
 import { USER_STATUS, EMAIL_VERIFICATION_ACTION_TYPE } from '../enums/prisma.enum';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
@@ -84,9 +85,11 @@ export const checkUsername = async (
     });
 
     // Check the number of username changes
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const limitDays = new Date(
+      Date.now() - Number(USERNAME_CHANGE_LIMIT_DAYS) * 24 * 60 * 60 * 1000,
+    );
     const changeCount = await prisma.usernameChangeHistory.count({
-      where: { userId, changedAt: { gte: sevenDaysAgo } },
+      where: { userId, changedAt: { gte: limitDays } },
     });
 
     return {
@@ -125,9 +128,11 @@ export const updateUser = async (
     // Validate username
     if (username && username !== user?.username) {
       // Check the number of username changes
-      const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const limitDays = new Date(
+        Date.now() - Number(USERNAME_CHANGE_LIMIT_DAYS) * 24 * 60 * 60 * 1000,
+      );
       const changeCount = await prisma.usernameChangeHistory.count({
-        where: { userId: id, changedAt: { gte: sevenDaysAgo } },
+        where: { userId: id, changedAt: { gte: limitDays } },
       });
       if (changeCount >= 5) {
         return {
