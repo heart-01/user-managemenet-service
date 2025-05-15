@@ -85,9 +85,7 @@ export const checkUsername = async (
     });
 
     // Check the number of username changes
-    const limitDays = new Date(
-      Date.now() - Number(USERNAME_CHANGE_LIMIT_DAYS) * 24 * 60 * 60 * 1000,
-    );
+    const limitDays = dayjs().subtract(Number(USERNAME_CHANGE_LIMIT_DAYS), 'day').toDate();
     const changeCount = await prisma.usernameChangeHistory.count({
       where: { userId, changedAt: { gte: limitDays } },
     });
@@ -128,9 +126,7 @@ export const updateUser = async (
     // Validate username
     if (username && username !== user?.username) {
       // Check the number of username changes
-      const limitDays = new Date(
-        Date.now() - Number(USERNAME_CHANGE_LIMIT_DAYS) * 24 * 60 * 60 * 1000,
-      );
+      const limitDays = dayjs().subtract(Number(USERNAME_CHANGE_LIMIT_DAYS), 'day').toDate();
       const changeCount = await prisma.usernameChangeHistory.count({
         where: { userId: id, changedAt: { gte: limitDays } },
       });
