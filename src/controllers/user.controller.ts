@@ -31,13 +31,16 @@ export const checkUsername = async (request: Request, response: Response) => {
 export const updateUser = async (request: Request, response: Response) => {
   logger.start(request);
   const { id } = request.params as UpdateUserParamType;
-  const { bio, name, password, username } = request.body as UpdateUserBodyType;
+  const { bio, firstname, lastname, password, username } = request.body as UpdateUserBodyType;
   const data = {
     ...(bio !== undefined && {
       bio,
     }),
-    ...(name !== undefined && {
-      name,
+    ...(firstname !== undefined && {
+      firstname,
+    }),
+    ...(lastname !== undefined && {
+      lastname,
     }),
     ...(password !== undefined && {
       password,

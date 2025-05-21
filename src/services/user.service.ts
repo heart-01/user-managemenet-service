@@ -34,7 +34,8 @@ export const getUserById = async (id: string): Promise<ResponseCommonType<UserTy
       where: { id },
       select: {
         id: true,
-        name: true,
+        firstname: true,
+        lastname: true,
         phoneNumber: true,
         bio: true,
         username: true,
@@ -181,7 +182,8 @@ export const updateUser = async (
       },
       select: {
         id: true,
-        name: true,
+        firstname: true,
+        lastname: true,
         phoneNumber: true,
         bio: true,
         username: true,

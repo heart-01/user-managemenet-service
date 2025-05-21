@@ -49,7 +49,11 @@ describe('Auth Local Service (Current year: 2024)', () => {
 
     it('should user payload when token is valid', async () => {
       const token = 'valid-token';
-      const payload: PayloadAccessTokenType = { id: 'user-id', name: 'user-name' };
+      const payload: PayloadAccessTokenType = {
+        id: 'user-id',
+        firstname: 'user-firstname',
+        lastname: 'user-lastname',
+      };
       const expected: AuthValidateResponseType = { user: payload };
 
       (verify as jest.Mock).mockReturnValue(payload);
@@ -82,7 +86,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -100,7 +105,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         isFirstTimeLogin: false,
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@test.com',
           password: true,
@@ -216,7 +222,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -243,7 +250,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: null,
@@ -270,7 +278,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -313,7 +322,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -367,7 +377,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -422,7 +433,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -467,7 +479,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -513,7 +526,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -653,7 +667,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUpdatedUser: UserType = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -669,7 +684,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         isFirstTimeLogin: true,
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@test.com',
           imageUrl: null,
@@ -696,7 +712,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test',
         password: '1234',
         confirmPassword: '1234',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -711,7 +728,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test',
         password: '1234',
         confirmPassword: '12345',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -722,7 +740,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -743,7 +762,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test',
         password: '1234',
         confirmPassword: '1234',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -766,7 +786,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test',
         password: '1234',
         confirmPassword: '1234',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -790,7 +811,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test2',
         password: '1234',
         confirmPassword: '1234',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -807,7 +829,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
         username: 'test',
         password: '1234',
         confirmPassword: '1234',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         userPolicy: ['31111111-1111-1111-1111-111111111111'],
       };
       const result = await authLocalService.register(user);
@@ -823,7 +846,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -880,7 +904,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -937,7 +962,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -986,7 +1012,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -1034,7 +1061,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -1086,7 +1114,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: UserType = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -1100,7 +1129,8 @@ describe('Auth Local Service (Current year: 2024)', () => {
       const expected: ResetPasswordResponseType = {
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@test.com',
           imageUrl: null,

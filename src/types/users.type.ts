@@ -19,7 +19,8 @@ export type UserAuthType = UserType & {
 
 export type UpdateUserBodyType = {
   bio?: string | null;
-  name?: string | null;
+  firstname?: string | null;
+  lastname?: string | null;
   password?: string;
   username?: string;
 };

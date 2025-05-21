@@ -40,7 +40,12 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         data: new GoogleIdTokenMissingScopeError(),
       };
     }
-    userPayload.name = userPayload.name.replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '').substring(0, 30);
+    userPayload.firstname = userPayload.given_name
+      .replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '')
+      .substring(0, 30);
+    userPayload.lastname = userPayload.family_name
+      .replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '')
+      .substring(0, 30);
 
     // Get user and authProvider
     let user = (await prisma.user.findFirst({
@@ -53,7 +58,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       },
       select: {
         id: true,
-        name: true,
+        firstname: true,
+        lastname: true,
         phoneNumber: true,
         bio: true,
         username: true,
@@ -75,7 +81,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         },
         select: {
           id: true,
-          name: true,
+          firstname: true,
+          lastname: true,
           phoneNumber: true,
           bio: true,
           username: true,
@@ -105,7 +112,11 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         },
       });
       const accessToken = generateToken(
-        { id: user.id, name: user.name } as PayloadAccessTokenType,
+        {
+          id: user.id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+        } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -114,7 +125,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         data: {
           user: {
             id: user.id,
-            name: user.name,
+            firstname: user.firstname,
+            lastname: user.lastname,
             phoneNumber: user.phoneNumber,
             bio: user.bio,
             username: user.username,
@@ -137,14 +149,25 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
     // Case when user unlinked provider the user but signIn google again
     if (user && !authProvider) {
       const newAuthProvider = await runTransaction(async (prismaTransaction) => {
-        // Update name user if not exist
-        if (!user?.name) {
+        // Update firstname user if not exist
+        if (!user?.firstname) {
           await prismaTransaction.user.update({
             where: {
               id: user.id,
             },
             data: {
-              name: userPayload.name,
+              firstname: userPayload.firstname,
+            },
+          });
+        }
+        // Update lastname user if not exist
+        if (!user?.lastname) {
+          await prismaTransaction.user.update({
+            where: {
+              id: user.id,
+            },
+            data: {
+              lastname: userPayload.lastname,
             },
           });
         }
@@ -188,7 +211,11 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         return newAuthProvider;
       });
       const accessToken = generateToken(
-        { id: user.id, name: user.name } as PayloadAccessTokenType,
+        {
+          id: user.id,
+          firstname: user.firstname || userPayload.firstname,
+          lastname: user.lastname || userPayload.lastname,
+        } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -197,7 +224,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         data: {
           user: {
             id: user.id,
-            name: user.name,
+            firstname: user.firstname || userPayload.firstname,
+            lastname: user.lastname || userPayload.lastname,
             phoneNumber: user.phoneNumber,
             bio: user.bio,
             username: user.username,
@@ -222,13 +250,15 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
       const result = await runTransaction(async (prismaTransaction) => {
         const newUser = await prismaTransaction.user.create({
           data: {
-            name: userPayload.name,
+            firstname: userPayload.firstname,
+            lastname: userPayload.lastname,
             email: userPayload.email,
             status: USER_STATUS.ACTIVATED,
           },
           select: {
             id: true,
-            name: true,
+            firstname: true,
+            lastname: true,
             phoneNumber: true,
             bio: true,
             username: true,
@@ -271,7 +301,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
 
         return {
           id: newUser.id,
-          name: newUser.name,
+          firstname: newUser.firstname,
+          lastname: newUser.lastname,
           phoneNumber: newUser.phoneNumber,
           bio: newUser.bio,
           username: newUser.username,
@@ -287,7 +318,11 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         } as UserAuthType;
       });
       const accessToken = generateToken(
-        { id: result.id, name: result.name } as PayloadAccessTokenType,
+        {
+          id: result.id,
+          firstname: result.firstname,
+          lastname: result.lastname,
+        } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );

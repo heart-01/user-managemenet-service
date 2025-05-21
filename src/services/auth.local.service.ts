@@ -91,7 +91,8 @@ const login = async (
       where: { email },
       select: {
         id: true,
-        name: true,
+        firstname: true,
+        lastname: true,
         phoneNumber: true,
         bio: true,
         username: true,
@@ -146,7 +147,11 @@ const login = async (
       });
 
       const accessToken = generateToken(
-        { id: user.id, name: user.name } as PayloadAccessTokenType,
+        {
+          id: user.id,
+          firstname: user.firstname,
+          lastname: user.lastname,
+        } as PayloadAccessTokenType,
         JWT_SECRET,
         ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
       );
@@ -161,7 +166,8 @@ const login = async (
             password: Boolean(user.password),
             email: user.email,
             imageUrl: user.imageUrl,
-            name: user.name,
+            firstname: user.firstname,
+            lastname: user.lastname,
             phoneNumber: user.phoneNumber,
             status: user.status,
             createdAt: user.createdAt,
@@ -416,14 +422,16 @@ const register = async (
       const userUpdated = await prismaTransaction.user.update({
         where: { id: user.userId },
         data: {
-          name: user.name,
+          firstname: user.firstname,
+          lastname: user.lastname,
           username: user.username,
           password: hashedPassword,
           status: USER_STATUS.ACTIVATED,
         },
         select: {
           id: true,
-          name: true,
+          firstname: true,
+          lastname: true,
           phoneNumber: true,
           bio: true,
           username: true,
@@ -445,7 +453,11 @@ const register = async (
     });
 
     const accessToken = generateToken(
-      { id: result.id, name: result.name } as PayloadAccessTokenType,
+      {
+        id: result.id,
+        firstname: result.firstname,
+        lastname: result.lastname,
+      } as PayloadAccessTokenType,
       JWT_SECRET,
       ACCESS_TOKEN_EXPIRES_IN as SignOptions['expiresIn'],
     );
@@ -455,7 +467,8 @@ const register = async (
       data: {
         user: {
           id: result.id,
-          name: result.name,
+          firstname: result.firstname,
+          lastname: result.lastname,
           phoneNumber: result.phoneNumber,
           bio: result.bio,
           username: result.username,
@@ -649,7 +662,8 @@ const resetPassword = async (
       },
       select: {
         id: true,
-        name: true,
+        firstname: true,
+        lastname: true,
         phoneNumber: true,
         bio: true,
         username: true,

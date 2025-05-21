@@ -1,4 +1,5 @@
 import type { AuthProvider, Policy } from '@prisma/client';
+import type { TokenPayload } from 'google-auth-library';
 import { prisma } from '../../config/database';
 import { googleClient } from '../../config/googleAuth';
 import { HTTP_RESPONSE_CODE } from '../../enums/response.enum';
@@ -54,7 +55,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -90,7 +92,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
         isFirstTimeLogin: true,
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@test.com',
           imageUrl: null,
@@ -109,7 +112,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
         getPayload: () => ({
           sub: 'test',
-          name: 'test',
+          given_name: 'test',
+          family_name: 'test',
           email: 'test@gmail.com',
         }),
       });
@@ -129,7 +133,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockFindUser: UserAuthType = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -154,7 +159,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       };
       const mockUser = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -172,7 +178,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
         isFirstTimeLogin: false,
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@test.com',
           imageUrl: null,
@@ -198,11 +205,13 @@ describe('Auth Google Service (Current year: 2024)', () => {
       };
 
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
-        getPayload: () => ({
-          sub: 'test',
-          name: 'test',
-          email: 'test@gmail.com',
-        }),
+        getPayload: () =>
+          ({
+            sub: 'test',
+            given_name: 'test',
+            family_name: 'test',
+            email: 'test@gmail.com',
+          }) as TokenPayload,
       });
       (prisma.user.findFirst as jest.Mock).mockResolvedValue(mockFindUser);
       (prisma.user.update as jest.Mock).mockResolvedValue(mockUser);
@@ -217,7 +226,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@gmail.com',
         imageUrl: null,
@@ -258,7 +268,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
         isFirstTimeLogin: false,
         user: {
           id: userId,
-          name: 'test',
+          firstname: 'test',
+          lastname: 'test',
           bio: null,
           email: 'test@gmail.com',
           imageUrl: null,
@@ -277,7 +288,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
         getPayload: () => ({
           sub: 'test',
-          name: 'test',
+          given_name: 'test',
+          family_name: 'test',
           email: 'test@gmail.com',
         }),
       });
@@ -297,7 +309,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
         getPayload: () => ({
           sub: null,
-          name: null,
+          given_name: null,
+          family_name: null,
           email: null,
         }),
       });
@@ -310,7 +323,8 @@ describe('Auth Google Service (Current year: 2024)', () => {
       (googleClient.verifyIdToken as jest.Mock).mockResolvedValue({
         getPayload: () => ({
           sub: 'test',
-          name: 'test',
+          given_name: 'test',
+          family_name: 'test',
           email: 'test@gmail.com',
         }),
       });

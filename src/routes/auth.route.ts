@@ -11,7 +11,8 @@ const authRouter: express.Router = express.Router();
 /**
  * @typedef {object} User
  * @property {string} id - User ID
- * @property {string} name - User's name
+ * @property {string} firstname - User's firstname
+ * @property {string} lastname - User's lastname
  * @property {string} phoneNumber - User's phone number
  * @property {string} bio - User's biography
  * @property {string} username - User's username
@@ -36,7 +37,8 @@ const authRouter: express.Router = express.Router();
 /**
  * @typedef {object} UserAuth
  * @property {string} id - User ID
- * @property {string} name - User's name
+ * @property {string} firstname - User's firstname
+ * @property {string} lastname - User's lastname
  * @property {string} phoneNumber - User's phone number
  * @property {string} bio - User's biography
  * @property {string} username - User's username
@@ -190,7 +192,8 @@ const authRouter: express.Router = express.Router();
  * @property {string} userId - User's ID
  * @property {string} password - User's password
  * @property {string} confirmPassword - User's password confirmation
- * @property {string} name - User's name
+ * @property {string} firstname - User's firstname
+ * @property {string} lastname - User's lastname
  * @property {string} username - User's username
  * @property {Array<string>} userPolicy - User's policy agreement
  */

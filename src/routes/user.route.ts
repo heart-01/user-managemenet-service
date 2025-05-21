@@ -12,7 +12,8 @@ const userRouter: express.Router = express.Router();
  * User Success Response Type
  * @typedef {object} UserSuccessResponse
  * @property {string} id - User ID
- * @property {string} name - User's name
+ * @property {string} firstname - User's firstname
+ * @property {string} lastname - User's lastname
  * @property {string} phoneNumber - User's phone number
  * @property {string} bio - User's biography
  * @property {string} username - User's username
@@ -28,10 +29,11 @@ const userRouter: express.Router = express.Router();
 /**
  * Update user type
  * @typedef {object} UpdateUserBodyType
- * @property {string} bio
- * @property {string} name
- * @property {string} password
- * @property {string} username
+ * @property {string} bio - User's biography
+ * @property {string} firstname - User's firstname
+ * @property {string} lastname - User's lastname
+ * @property {string} password  - User's password
+ * @property {string} username  - User's username
  */
 
 /**

@@ -16,7 +16,8 @@ const seed = async () => {
     const users = [
       {
         id: '344e70a7-9d79-4579-b83b-80060d2b95c5',
-        name: 'John Doe',
+        firstname: 'John',
+        lastname: 'Doe',
         username: 'johndoe',
         password: await hashPassword('Password1'),
         email: 'john@email.com',
@@ -24,7 +25,8 @@ const seed = async () => {
       },
       {
         id: 'ddc3fb92-62c4-4232-81b2-38b1ff0a3333',
-        name: 'Jane Smith',
+        firstname: 'Jane',
+        lastname: 'Smith',
         username: 'janesmith',
         password: await hashPassword('Password1'),
         email: 'jane@email.com',

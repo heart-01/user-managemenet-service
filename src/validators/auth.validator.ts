@@ -45,7 +45,8 @@ const verifyEmail: Joi.ObjectSchema = Joi.object().keys({
 const userPayloadSchema = Joi.object({
   sub: Joi.string().required(),
   email: Joi.string().email().required(),
-  name: Joi.string().required(),
+  given_name: Joi.string().required(),
+  family_name: Joi.string().required(),
 }).unknown(true);
 
 const register: Joi.ObjectSchema = Joi.object().keys({
@@ -63,7 +64,8 @@ const register: Joi.ObjectSchema = Joi.object().keys({
   userPolicy: Joi.array()
     .items(Joi.string().guid({ version: 'uuidv4' }).required())
     .required(),
-  name: Joi.string().required(),
+  firstname: Joi.string().required(),
+  lastname: Joi.string().required(),
   username: Joi.string()
     .required()
     .min(USERNAME_VALIDATE.MIN)

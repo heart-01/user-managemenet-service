@@ -41,7 +41,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -56,7 +57,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const expected = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -103,7 +105,8 @@ describe('User Service (Current year: 2024)', () => {
       const username = 'existingUser';
       const mockUser: User = {
         id: '11111111-1111-1111-1111-111111111111',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -134,7 +137,8 @@ describe('User Service (Current year: 2024)', () => {
       const username = 'admin';
       const mockUser: User = {
         id: '11111111-1111-1111-1111-111111111111',
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -200,13 +204,15 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const data: UpdateUserBodyType = {
         bio: 'test',
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
         username: 'test',
         password: 'Abcd1234',
       };
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -221,7 +227,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const mockUpdatedUser: User = {
         id: userId,
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
         bio: 'test',
         email: 'test@test.com',
         imageUrl: null,
@@ -243,7 +250,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const expected = {
         id: userId,
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
         bio: 'test',
         email: 'test@test.com',
         imageUrl: null,
@@ -278,7 +286,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -293,7 +302,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const mockUserAlreadyExists: User = {
         id: '11111111-1111-1111-1111-111111111112',
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
         bio: null,
         email: 'test2@test.com',
         imageUrl: null,
@@ -321,7 +331,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -355,7 +366,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -388,7 +400,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '21111111-1111-1111-1111-111111111111';
       const data: UpdateUserBodyType = {
         bio: 'test',
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
       };
       const result = await userService.updateUser(userId, data);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.NOT_FOUND);
@@ -397,7 +410,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -415,7 +429,8 @@ describe('User Service (Current year: 2024)', () => {
 
       const data: UpdateUserBodyType = {
         bio: 'test',
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
         password: 'Abcd1234',
       };
       const result = await userService.updateUser(userId, data);
@@ -427,7 +442,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const data: UpdateUserBodyType = {
         bio: 'test',
-        name: 'test2',
+        firstname: 'test2',
+        lastname: 'test2',
       };
       const result = await userService.updateUser(userId, data);
       expect(result.status).toStrictEqual(HTTP_RESPONSE_CODE.INTERNAL_SERVER_ERROR);
@@ -443,7 +459,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -458,7 +475,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const mockDeletedUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -473,7 +491,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const expected = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -522,7 +541,8 @@ describe('User Service (Current year: 2024)', () => {
       const reason = 'no longer need account';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -581,7 +601,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -635,7 +656,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -689,7 +711,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -735,7 +758,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         password: '1234',
@@ -800,7 +824,8 @@ describe('User Service (Current year: 2024)', () => {
       const userId = '11111111-1111-1111-1111-111111111111';
       const mockUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -815,7 +840,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const mockDeletedUser: User = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,
@@ -830,7 +856,8 @@ describe('User Service (Current year: 2024)', () => {
       };
       const expected = {
         id: userId,
-        name: 'test',
+        firstname: 'test',
+        lastname: 'test',
         bio: null,
         email: 'test@test.com',
         imageUrl: null,

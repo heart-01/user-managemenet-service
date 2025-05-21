@@ -54,7 +54,8 @@ export type VerifyEmailResponseType = {
 
 export type PayloadAccessTokenType = {
   id: string;
-  name: string;
+  firstname: string;
+  lastname: string;
 };
 
 export type PayloadTokenVerifyEmailType = {
@@ -72,7 +73,8 @@ export type RegisterType = {
   password: string;
   confirmPassword: string;
   userPolicy: string[];
-  name: string;
+  firstname: string;
+  lastname: string;
   username: string;
 };
 

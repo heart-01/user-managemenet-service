@@ -96,7 +96,9 @@ export const googleAuth = async (request: Request, response: Response) => {
       const pruneOldestSessionIfExceededRes =
         await userDeviceSessionService.pruneOldestSessionIfExceeded(userId, String(deviceId));
       if (pruneOldestSessionIfExceededRes.status !== HTTP_RESPONSE_CODE.OK) {
-        response.status(pruneOldestSessionIfExceededRes.status).send(pruneOldestSessionIfExceededRes.data);
+        response
+          .status(pruneOldestSessionIfExceededRes.status)
+          .send(pruneOldestSessionIfExceededRes.data);
         logger.end(request);
         return;
       }
@@ -196,7 +198,9 @@ export const localAuth = async (request: Request, response: Response) => {
       const pruneOldestSessionIfExceededRes =
         await userDeviceSessionService.pruneOldestSessionIfExceeded(userId, String(deviceId));
       if (pruneOldestSessionIfExceededRes.status !== HTTP_RESPONSE_CODE.OK) {
-        response.status(pruneOldestSessionIfExceededRes.status).send(pruneOldestSessionIfExceededRes.data);
+        response
+          .status(pruneOldestSessionIfExceededRes.status)
+          .send(pruneOldestSessionIfExceededRes.data);
         logger.end(request);
         return;
       }
@@ -239,14 +243,15 @@ export const verifyEmail = async (request: Request, response: Response) => {
 
 export const register = async (request: Request, response: Response) => {
   logger.start(request);
-  const { userId, password, confirmPassword, userPolicy, name, username } =
+  const { userId, password, confirmPassword, userPolicy, firstname, lastname, username } =
     request.body as RegisterType;
   const result = await authLocalService.register({
     userId,
     password,
     confirmPassword,
     userPolicy,
-    name,
+    firstname,
+    lastname,
     username: username.toLocaleLowerCase(),
   });
   response.status(result.status).send(result.data);
