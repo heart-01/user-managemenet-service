@@ -8,6 +8,7 @@ import { ACCESS_TOKEN_EXPIRES_IN, GOOGLE_CLIENT_ID, JWT_SECRET } from '../config
 import { prisma, runTransaction } from '../config/database';
 import { HTTP_RESPONSE_CODE } from '../enums/response.enum';
 import { USER_STATUS, AUTH_PROVIDER_NAME, POLICY_TYPE } from '../enums/prisma.enum';
+import { ONLY_LETTERS_REGEX } from '../enums/user.enum';
 import { UserAuthType } from '../types/users.type';
 import { ResponseCommonType } from '../types/common.type';
 import { AuthResponseType, PayloadAccessTokenType } from '../types/auth.type';
@@ -40,12 +41,8 @@ const login = async (idToken: string): Promise<ResponseCommonType<AuthResponseTy
         data: new GoogleIdTokenMissingScopeError(),
       };
     }
-    userPayload.firstname = userPayload.given_name
-      .replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '')
-      .substring(0, 30);
-    userPayload.lastname = userPayload.family_name
-      .replace(/[^A-Za-z\u0E00-\u0E7F ]/g, '')
-      .substring(0, 30);
+    userPayload.firstname = userPayload.given_name.replace(ONLY_LETTERS_REGEX, '').substring(0, 30);
+    userPayload.lastname = userPayload.family_name.replace(ONLY_LETTERS_REGEX, '').substring(0, 30);
 
     // Get user and authProvider
     let user = (await prisma.user.findFirst({
