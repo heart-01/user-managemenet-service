@@ -64,8 +64,8 @@ const register: Joi.ObjectSchema = Joi.object().keys({
   userPolicy: Joi.array()
     .items(Joi.string().guid({ version: 'uuidv4' }).required())
     .required(),
-  firstname: Joi.string().required(),
-  lastname: Joi.string().required(),
+  firstname: Joi.string().max(30).required(),
+  lastname: Joi.string().max(30).required(),
   username: Joi.string()
     .required()
     .min(USERNAME_VALIDATE.MIN)
