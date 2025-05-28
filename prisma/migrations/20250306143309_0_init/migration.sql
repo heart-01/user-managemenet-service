@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED');
+CREATE TYPE "USER_STATUS" AS ENUM ('PENDING', 'ACTIVATED', 'DEACTIVATED');
 
 -- CreateEnum
 CREATE TYPE "AUTH_PROVIDER_NAME" AS ENUM ('GOOGLE', 'FACEBOOK', 'GITHUB', 'TWITTER', 'EMAIL');
@@ -20,9 +20,9 @@ CREATE TABLE "users" (
     "lastname" VARCHAR(40),
     "phone_number" VARCHAR(20),
     "bio" TEXT,
-    "username" VARCHAR(50),
+    "username" VARCHAR(90),
     "password" VARCHAR(60),
-    "email" VARCHAR(50) NOT NULL,
+    "email" VARCHAR(90) NOT NULL,
     "imageUrl" VARCHAR(255),
     "status" "USER_STATUS" NOT NULL,
     "latest_login_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -38,7 +38,7 @@ CREATE TABLE "auth_providers" (
     "id" UUID NOT NULL,
     "user_id" UUID,
     "auth_provider" "AUTH_PROVIDER_NAME" NOT NULL,
-    "provider_user_id" VARCHAR(50) NOT NULL,
+    "provider_user_id" VARCHAR(90) NOT NULL,
     "provider_email" VARCHAR(50) NOT NULL,
     "linked_at" TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 

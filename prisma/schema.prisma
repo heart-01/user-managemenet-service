@@ -17,6 +17,7 @@ datasource db {
 enum USER_STATUS {
   PENDING
   ACTIVATED
+  DEACTIVATED
 }
 
 enum AUTH_PROVIDER_NAME {
@@ -50,9 +51,9 @@ model User {
   lastname              String?                 @map("lastname") @db.VarChar(40)
   phoneNumber           String?                 @map("phone_number") @db.VarChar(20)
   bio                   String?                 @map("bio") @db.Text
-  username              String?                 @unique @map("username") @db.VarChar(50)
+  username              String?                 @unique @map("username") @db.VarChar(90)
   password              String?                 @map("password") @db.VarChar(60)
-  email                 String                  @unique @map("email") @db.VarChar(50)
+  email                 String                  @unique @map("email") @db.VarChar(90)
   imageUrl              String?                 @map("imageUrl") @db.VarChar(255)
   status                USER_STATUS             @map("status")
   latestLoginAt         DateTime                @default(now()) @map("latest_login_at") @db.Timestamptz(3)
@@ -73,7 +74,7 @@ model AuthProvider {
   id             String             @id @default(uuid()) @db.Uuid
   userId         String?            @map("user_id") @db.Uuid
   authProvider   AUTH_PROVIDER_NAME @map("auth_provider")
-  providerUserId String             @unique @map("provider_user_id") @db.VarChar(50)
+  providerUserId String             @unique @map("provider_user_id") @db.VarChar(90)
   providerEmail  String             @map("provider_email") @db.VarChar(50)
   linkedAt       DateTime           @default(now()) @map("linked_at") @db.Timestamptz(3)
 
