@@ -2,6 +2,7 @@ import { SingleBar, Presets } from 'cli-progress';
 import dayjs from '../config/dayjs';
 import { prisma, runTransaction } from '../config/database';
 import { USER_STATUS } from '../enums/prisma.enum';
+import { loggerService } from '../services';
 
 const computeCutoffDate = (days: number): Date => dayjs().subtract(days, 'day').toDate();
 
@@ -48,8 +49,10 @@ const deactivateUserAndProviders = async (
 };
 
 const execute = async (olderThanDays = 30): Promise<void> => {
+  loggerService.info('Start checking...');
   const cutoff = computeCutoffDate(olderThanDays);
   const usersToDeactivate = await getUsersToDeactivate(cutoff);
+  loggerService.info(JSON.stringify(usersToDeactivate));
   const progressBar = new SingleBar(
     { format: 'Deactivating |{bar}| {percentage}% || {value}/{total} users' },
     Presets.shades_classic,
@@ -64,6 +67,7 @@ const execute = async (olderThanDays = 30): Promise<void> => {
   }
 
   progressBar.stop();
+  loggerService.info('Done.');
 };
 
 execute();
