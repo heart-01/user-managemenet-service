@@ -127,7 +127,7 @@ model UserActivityLog {
   loginTime     DateTime                      @map("login_time") @db.Timestamp(3)
   ipAddress     String?                       @map("ip_address") @db.VarChar(50)
   location      String?                       @map("location") @db.VarChar(50)
-  userAgent     String?                       @map("user_agent") @db.VarChar(50)
+  userAgent     String?                       @map("user_agent") @db.VarChar(255)
   status        Int                           @map("status")
   action        USER_ACTIVITY_LOG_ACTION_TYPE @map("action")
   failureReason String?                       @map("failure_reason") @db.VarChar(255)
@@ -151,7 +151,7 @@ model UserDeviceSession {
   id           String   @id @default(uuid()) @db.Uuid
   userId       String   @map("user_id") @db.Uuid
   deviceId     String   @map("device_id") @db.Uuid
-  deviceName   String?  @map("device_name") @db.VarChar(50)
+  deviceName   String?  @map("device_name") @db.VarChar(255)
   ipAddress    String?  @map("ip_address") @db.VarChar(50)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   lastActiveAt DateTime @default(now()) @map("last_active_at") @db.Timestamptz(3)

@@ -97,6 +97,7 @@ const authRouter: express.Router = express.Router();
  * POST /auth/google/login
  * @summary Google Auth
  * @tags auth
+ * @param {string} x-device-id.header.required - Client's unique device identifier
  * @param {GoogleAuthRequest} request.body.required - Google Auth idToken
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
@@ -139,6 +140,7 @@ const authRouter: express.Router = express.Router();
  * POST /auth/local/login
  * @summary Local Auth
  * @tags auth
+ * @param {string} x-device-id.header.required - Client's unique device identifier
  * @param {LocalAuthRequest} request.body.required - User's email and password
  * @return {AuthSuccessResponse} 200 - Success response - application/json
  * @return {string} 401 - Unauthorized - application/json
